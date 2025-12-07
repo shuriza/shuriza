@@ -1,0 +1,17 @@
+# Ignore sensitive files
+config.ini
+credentials.json
+client_secret_*.json
+token.json
+*.xlsx
+
+# Ignore Python virtual environment
+venv/
+*.pyc
+__pycache__/
+
+# Ignore browser data (saved login sessions)
+browser_data/
+
+# Ignore screenshots
+screenshots/

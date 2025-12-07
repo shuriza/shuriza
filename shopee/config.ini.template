@@ -1,0 +1,13 @@
+[SHOPEE]
+USERNAME=your_shopee_username
+PASSWORD=your_shopee_password
+
+[GOOGLE_DRIVE]
+# Path to your Google Drive API credentials file (credentials.json)
+# You will get this file in the next step.
+CREDENTIALS_PATH=credentials.json
+# ID of the Google Drive folder where screenshots will be uploaded.
+# To get the folder ID, open the folder in your browser.
+# The ID is the last part of the URL.
+# e.g., for https://drive.google.com/drive/folders/1a2b3c4d5e6f7g8h9i0j, the ID is 1a2b3c4d5e6f7g8h9i0j
+FOLDER_ID=your_google_drive_folder_id
