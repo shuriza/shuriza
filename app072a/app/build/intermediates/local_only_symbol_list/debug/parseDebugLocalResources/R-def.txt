@@ -1,0 +1,36 @@
+R_DEF: Internal format may change without notice
+local
+color black
+color white
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+id btnDelete
+id btnFind
+id btnInsert
+id btnUpdate
+id cLayout
+id clMain
+id edNamaMhs
+id edNim
+id imUpload
+id imageView
+id listMhs
+id menu_camera
+id menu_gallery
+id spinProdi
+id textInputLayout
+id textInputLayout2
+id textView
+id txNama
+id txNim
+id txProdi
+layout activity_main
+layout row_mhs
+menu menu_media
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+style Base.Theme.App072a
+style Theme.App072a
+xml backup_rules
+xml data_extraction_rules

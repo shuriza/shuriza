@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:background="@android:color/white"
+    android:id="@+id/cLayout">
+
+    <!-- FOTO MAHASISWA di KANAN -->
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="Foto Mahasiswa"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_camera"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- NIM -->
+    <TextView
+        android:id="@+id/txNim"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="NIM: 123456"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imageView"
+        app:layout_constraintEnd_toStartOf="@id/imageView"
+        android:layout_marginEnd="8dp" />
+
+    <!-- NAMA -->
+    <TextView
+        android:id="@+id/txNama"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Nama: John Doe"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/txNim"
+        app:layout_constraintTop_toBottomOf="@id/txNim"
+        app:layout_constraintEnd_toEndOf="@id/txNim" />
+
+    <!-- PRODI -->
+    <TextView
+        android:id="@+id/txProdi"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Prodi: Teknik Informatika"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/txNama"
+        app:layout_constraintTop_toBottomOf="@id/txNama"
+        app:layout_constraintEnd_toEndOf="@id/txNama"
+        app:layout_constraintBottom_toBottomOf="@id/imageView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

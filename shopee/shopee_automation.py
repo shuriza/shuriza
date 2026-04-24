@@ -1,5 +1,10 @@
 import os.path
 import configparser
+import json
+import re
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -12,6 +17,210 @@ from shopee_module import ShopeeAutomation
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive"]
+CHECKPOINT_FILE = 'processed_orders.json'
+
+def validate_order_number(order_number):
+    """
+    Validate Shopee order number format.
+    Shopee format: YYMMDD followed by alphanumeric (e.g., 2504226A23B55PX)
+    
+    Args:
+        order_number: Order number string to validate
+    
+    Returns:
+        bool: True if valid format, False otherwise
+    """
+    # Pattern: 6 digits (YYMMDD) + alphanumeric characters
+    pattern = r'^\d{6}[A-Z0-9]+$'
+    return bool(re.match(pattern, order_number.upper()))
+
+def get_batch_orders():
+    """
+    Get order numbers from user with multiple input methods:
+    1. Comma-separated list
+    2. Newline-separated (traditional)
+    3. From text file
+    
+    Returns:
+        list: List of order numbers
+    """
+    print("\n" + "="*70)
+    print("INPUT NOMOR PESANAN")
+    print("="*70)
+    print("\nPilih metode input:")
+    print("1. Paste comma-separated (2504226A23B55PX, 2504226A34BUBPFX, ...)")
+    print("2. Input satu per satu (tekan Enter dua kali untuk selesai)")
+    print("3. Import dari file txt (orders.txt)")
+    
+    choice = input("\nPilih metode (1/2/3) [default: 2]: ").strip() or "2"
+    
+    order_numbers = []
+    
+    if choice == "1":
+        # Comma-separated input
+        print("\nPaste nomor pesanan (pisahkan dengan koma):")
+        orders_input = input().strip()
+        # Split by comma and clean up whitespace
+        order_numbers = [order.strip() for order in orders_input.split(',') if order.strip()]
+        
+    elif choice == "3":
+        # Read from file
+        file_path = input("\nNama file [default: orders.txt]: ").strip() or "orders.txt"
+        try:
+            with open(file_path, 'r') as f:
+                order_numbers = [line.strip() for line in f if line.strip()]
+            print(f"✓ Berhasil membaca {len(order_numbers)} pesanan dari {file_path}")
+        except FileNotFoundError:
+            print(f"✗ File '{file_path}' tidak ditemukan")
+            return []
+        except Exception as e:
+            print(f"✗ Error membaca file: {e}")
+            return []
+    else:
+        # Traditional one-by-one input (choice == "2")
+        print("\nMasukkan nomor pesanan (satu per baris, Enter kosong untuk selesai):")
+        while True:
+            order = input("Nomor pesanan: ").strip()
+            if not order:
+                break
+            order_numbers.append(order)
+            print(f"  ✓ Ditambahkan: {order}")
+    
+    # Validate order numbers
+    if order_numbers:
+        print(f"\n📋 Total {len(order_numbers)} pesanan ditemukan")
+        print("\n🔍 Validating order numbers...")
+        
+        valid_orders = []
+        invalid_orders = []
+        
+        for order in order_numbers:
+            if validate_order_number(order):
+                valid_orders.append(order)
+            else:
+                invalid_orders.append(order)
+        
+        if invalid_orders:
+            print(f"\n⚠ WARNING: {len(invalid_orders)} pesanan dengan format mencurigakan:")
+            for order in invalid_orders:
+                print(f"  - {order}")
+            
+            confirm = input("\nLanjutkan dengan semua pesanan? (y/n) [default: y]: ").strip().lower() or 'y'
+            if confirm != 'y':
+                print("Hanya pesanan valid yang akan diproses.")
+                return valid_orders
+        
+        print(f"✓ Validasi selesai: {len(valid_orders)} valid, {len(invalid_orders)} warning")
+        return order_numbers
+    else:
+        print("\n⚠ Tidak ada nomor pesanan yang diinput")
+        return []
+
+def save_checkpoint(order_number, gdrive_link):
+    """
+    Save processed order to checkpoint file for resume capability.
+    
+    Args:
+        order_number: Order number that was processed
+        gdrive_link: Google Drive link for the screenshot
+    """
+    try:
+        # Load existing checkpoint or create new
+        if os.path.exists(CHECKPOINT_FILE):
+            with open(CHECKPOINT_FILE, 'r') as f:
+                checkpoint = json.load(f)
+        else:
+            checkpoint = {'processed_orders': [], 'timestamp': None}
+        
+        # Add new order
+        checkpoint['processed_orders'].append({
+            'order_number': order_number,
+            'gdrive_link': gdrive_link,
+            'timestamp': datetime.now().isoformat()
+        })
+        checkpoint['timestamp'] = datetime.now().isoformat()
+        
+        # Save checkpoint
+        with open(CHECKPOINT_FILE, 'w') as f:
+            json.dump(checkpoint, f, indent=2)
+    except Exception as e:
+        print(f"    ⚠ Warning: Could not save checkpoint: {e}")
+
+def load_checkpoint():
+    """
+    Load checkpoint to resume interrupted session.
+    
+    Returns:
+        dict: Dictionary with 'processed_orders' list or empty dict
+    """
+    try:
+        if os.path.exists(CHECKPOINT_FILE):
+            with open(CHECKPOINT_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"⚠ Warning: Could not load checkpoint: {e}")
+    return {'processed_orders': []}
+
+def upload_to_gdrive_batch(service, file_paths, folder_id, max_workers=3):
+    """
+    Upload multiple files to Google Drive in parallel.
+    
+    Args:
+        service: Google Drive API service object
+        file_paths: List of file paths to upload
+        folder_id: Google Drive folder ID
+        max_workers: Maximum number of parallel uploads (default: 3)
+    
+    Returns:
+        dict: Dictionary mapping file paths to their Google Drive links
+    """
+    results = {}
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all upload tasks
+        future_to_path = {
+            executor.submit(upload_to_gdrive, service, path, folder_id): path 
+            for path in file_paths
+        }
+        
+        # Collect results as they complete
+        for future in as_completed(future_to_path):
+            file_path = future_to_path[future]
+            try:
+                gdrive_link = future.result()
+                results[file_path] = gdrive_link
+            except Exception as e:
+                print(f"    ✗ Exception uploading {file_path}: {e}")
+                results[file_path] = None
+    
+    return results
+
+def check_duplicate_in_excel(order_number, excel_file='shopee_report.xlsx'):
+    """
+    Check if order number already exists in Excel report.
+    
+    Args:
+        order_number: Order number to check
+        excel_file: Path to Excel file
+    
+    Returns:
+        bool: True if duplicate found, False otherwise
+    """
+    try:
+        if not os.path.exists(excel_file):
+            return False
+        
+        wb = openpyxl.load_workbook(excel_file)
+        ws = wb.active
+        
+        # Check column B (OrderSN) starting from row 2
+        for row in range(2, ws.max_row + 1):
+            if ws[f'B{row}'].value == order_number:
+                return True
+        
+        return False
+    except Exception:
+        return False
 
 def get_gdrive_service():
     """
@@ -64,48 +273,58 @@ def load_config():
     config.read('config.ini')
     return config
 
-def upload_to_gdrive(service, file_path, folder_id):
+def upload_to_gdrive(service, file_path, folder_id, max_retries=3):
     """
-    Uploads a file to Google Drive and returns the shareable link.
+    Uploads a file to Google Drive with retry mechanism and returns the shareable link.
     
     Args:
         service: Google Drive API service object
         file_path: Path to the file to upload
         folder_id: ID of the Google Drive folder to upload to
+        max_retries: Maximum number of retry attempts (default: 3)
     
     Returns:
         str: Shareable link to the uploaded file, or None if upload fails
     """
-    try:
-        file_name = os.path.basename(file_path)
-        file_metadata = {
-            'name': file_name,
-            'parents': [folder_id]
-        }
-        
-        media = MediaFileUpload(file_path, resumable=True)
-        file = service.files().create(
-            body=file_metadata,
-            media_body=media,
-            fields='id, webViewLink'
-        ).execute()
-        
-        # Make the file accessible to anyone with the link
-        permission = {
-            'type': 'anyone',
-            'role': 'reader'
-        }
-        service.permissions().create(
-            fileId=file.get('id'),
-            body=permission
-        ).execute()
-        
-        print(f"✓ Uploaded: {file_name}")
-        return file.get('webViewLink')
-        
-    except HttpError as error:
-        print(f"✗ Error uploading {file_path}: {error}")
-        return None
+    file_name = os.path.basename(file_path)
+    
+    for attempt in range(1, max_retries + 1):
+        try:
+            file_metadata = {
+                'name': file_name,
+                'parents': [folder_id]
+            }
+            
+            media = MediaFileUpload(file_path, resumable=True)
+            file = service.files().create(
+                body=file_metadata,
+                media_body=media,
+                fields='id, webViewLink'
+            ).execute()
+            
+            # Make the file accessible to anyone with the link
+            permission = {
+                'type': 'anyone',
+                'role': 'reader'
+            }
+            service.permissions().create(
+                fileId=file.get('id'),
+                body=permission
+            ).execute()
+            
+            print(f"    ✓ Uploaded: {file_name}")
+            return file.get('webViewLink')
+            
+        except HttpError as error:
+            if attempt < max_retries:
+                wait_time = 2 ** attempt  # Exponential backoff: 2, 4, 8 seconds
+                print(f"    ⚠ Upload attempt {attempt} failed, retrying in {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                print(f"    ✗ Upload failed after {max_retries} attempts: {error}")
+                return None
+    
+    return None
 
 def create_excel_report(order_data, output_file='shopee_report.xlsx'):
     """
@@ -137,6 +356,15 @@ def create_excel_report(order_data, output_file='shopee_report.xlsx'):
             ws[f'A{next_row}'] = current_no  # Sequential number
             ws[f'B{next_row}'] = data['order_number']
             ws[f'C{next_row}'] = data['gdrive_link']
+            
+            # Set alignment for new data rows
+            ws[f'A{next_row}'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            ws[f'B{next_row}'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            ws[f'C{next_row}'].alignment = openpyxl.styles.Alignment(wrap_text=True, vertical='top')
+            
+            # Set row height for better visibility
+            ws.row_dimensions[next_row].height = 30
+            
             next_row += 1
             current_no += 1
         
@@ -162,14 +390,23 @@ def create_excel_report(order_data, output_file='shopee_report.xlsx'):
             ws[f'A{idx}'] = idx - 1  # Sequential number starting from 1
             ws[f'B{idx}'] = data['order_number']
             ws[f'C{idx}'] = data['gdrive_link']
+            
+            # Set alignment for data rows
+            ws[f'A{idx}'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            ws[f'B{idx}'].alignment = openpyxl.styles.Alignment(horizontal='center', vertical='center')
+            ws[f'C{idx}'].alignment = openpyxl.styles.Alignment(wrap_text=True, vertical='top')
         
-        # Adjust column widths
-        ws.column_dimensions['A'].width = 5
-        ws.column_dimensions['B'].width = 20
-        ws.column_dimensions['C'].width = 100
+        # Adjust column widths for better visibility
+        ws.column_dimensions['A'].width = 6
+        ws.column_dimensions['B'].width = 25
+        ws.column_dimensions['C'].width = 120
         
-        # Set row height for header
-        ws.row_dimensions[1].height = 80
+        # Set row height for header (taller for long instruction text)
+        ws.row_dimensions[1].height = 100
+        
+        # Set row height for data rows
+        for row_num in range(2, len(order_data) + 2):
+            ws.row_dimensions[row_num].height = 30
     
     wb.save(output_file)
     print(f"✓ Excel report created/updated: {output_file}")
@@ -178,7 +415,7 @@ def create_excel_report(order_data, output_file='shopee_report.xlsx'):
 def main():
     """Main function to run the full automation workflow."""
     print("\n" + "="*70)
-    print("SHOPEE AUTOMATION - FULL WORKFLOW")
+    print("🚀 SHOPEE AUTOMATION - ENHANCED VERSION")
     print("="*70)
     
     # Load configuration
@@ -194,8 +431,24 @@ def main():
         print("Please edit config.ini and add your Shopee username and password.")
         return
     
+    # Check for resume capability
+    checkpoint = load_checkpoint()
+    if checkpoint.get('processed_orders'):
+        print(f"\n📌 Found checkpoint with {len(checkpoint['processed_orders'])} processed orders")
+        resume = input("Resume from checkpoint? (y/n) [default: n]: ").strip().lower()
+        if resume == 'y':
+            processed_order_numbers = [o['order_number'] for o in checkpoint['processed_orders']]
+            print(f"✓ Will skip {len(processed_order_numbers)} already processed orders")
+        else:
+            processed_order_numbers = []
+            # Clear checkpoint
+            if os.path.exists(CHECKPOINT_FILE):
+                os.remove(CHECKPOINT_FILE)
+    else:
+        processed_order_numbers = []
+    
     # Step 1: Connect to Google Drive
-    print("\n[1/5] Connecting to Google Drive...")
+    print("\n[1/5] 📡 Connecting to Google Drive...")
     gdrive_service = get_gdrive_service()
     if not gdrive_service:
         print("✗ Could not connect to Google Drive. Aborting.")
@@ -203,51 +456,111 @@ def main():
     print("✓ Google Drive connected!")
     
     # Step 2: Initialize Shopee automation
-    print("\n[2/5] Initializing Shopee automation...")
+    print("\n[2/5] 🌐 Initializing Shopee automation...")
     shopee = ShopeeAutomation(username, password, headless=False, chrome_profile=chrome_profile)
     shopee.start_browser()
     
     try:
         # Step 3: Login to Shopee
-        print("\n[3/5] Logging in to Shopee Seller Centre...")
+        print("\n[3/5] 🔐 Logging in to Shopee Seller Centre...")
         if not shopee.login():
             print("✗ Login failed. Aborting.")
             return
         
-        # Step 4: Get orders and process
-        print("\n[4/5] Getting orders and taking screenshots...")
-        order_numbers = shopee.get_orders_to_ship()
+        # Step 4: Get orders (auto-detect or batch input)
+        print("\n[4/5] 📦 Getting orders...")
+        
+        # Check auto-detect setting
+        auto_detect = config.getboolean('AUTOMATION', 'AUTO_DETECT_ORDERS', fallback=True)
+        
+        # First try auto-detect from Shopee page if enabled
+        if auto_detect:
+            print("ℹ Auto-detect enabled (can be disabled in config.ini)")
+            order_numbers = shopee.get_orders_to_ship(auto_detect=True)
+        else:
+            print("ℹ Auto-detect disabled, using manual/batch input")
+            order_numbers = []
+        
+        # If auto-detect returned nothing, use batch input
+        if not order_numbers:
+            order_numbers = get_batch_orders()
         
         if not order_numbers:
-            print("\n⚠ No orders found. Would you like to manually enter order numbers?")
-            response = input("Enter 'y' to manually input orders, or any key to exit: ").strip().lower()
-            if response == 'y':
-                print("\nEnter order numbers (one per line, press Enter twice when done):")
-                order_numbers = []
-                while True:
-                    order = input().strip()
-                    if not order:
-                        break
-                    order_numbers.append(order)
+            print("No orders to process. Exiting.")
+            return
+        
+        # Filter out already processed orders
+        if processed_order_numbers:
+            original_count = len(order_numbers)
+            order_numbers = [o for o in order_numbers if o not in processed_order_numbers]
+            skipped = original_count - len(order_numbers)
+            if skipped > 0:
+                print(f"⏭ Skipping {skipped} already processed orders")
+        
+        if not order_numbers:
+            print("All orders already processed!")
+            return
+        
+        # Check for duplicates in Excel
+        print("\n🔍 Checking for duplicates in existing Excel...")
+        duplicates = []
+        for order in order_numbers:
+            if check_duplicate_in_excel(order):
+                duplicates.append(order)
+        
+        if duplicates:
+            print(f"\n⚠ WARNING: {len(duplicates)} order(s) already in Excel report:")
+            for dup in duplicates[:5]:  # Show first 5
+                print(f"  - {dup}")
+            if len(duplicates) > 5:
+                print(f"  ... and {len(duplicates) - 5} more")
             
-            if not order_numbers:
-                print("No orders to process. Exiting.")
-                return
+            confirm = input("\nProcess anyway? (y/n) [default: n]: ").strip().lower()
+            if confirm != 'y':
+                # Remove duplicates
+                order_numbers = [o for o in order_numbers if o not in duplicates]
+                print(f"✓ Removed {len(duplicates)} duplicates, {len(order_numbers)} orders remaining")
+                
+                if not order_numbers:
+                    print("No orders to process. Exiting.")
+                    return
         
-        # Process each order
+        # Process orders with progress tracking
         order_data = []
+        failed_orders = []
         screenshots_folder = 'screenshots'
+        total_orders = len(order_numbers)
+        start_time = time.time()
         
-        print(f"\nProcessing {len(order_numbers)} orders...")
+        print(f"\n{'='*70}")
+        print(f"📸 PROCESSING {total_orders} ORDERS")
+        print(f"{'='*70}\n")
+        
         for i, order_number in enumerate(order_numbers, 1):
-            print(f"\n[{i}/{len(order_numbers)}] Processing order: {order_number}")
+            # Progress indicator
+            progress_pct = (i / total_orders) * 100
+            elapsed = time.time() - start_time
+            if i > 1:
+                avg_time_per_order = elapsed / (i - 1)
+                remaining_orders = total_orders - i
+                eta_seconds = avg_time_per_order * remaining_orders
+                eta_minutes = int(eta_seconds // 60)
+                eta_seconds_remainder = int(eta_seconds % 60)
+                eta_str = f"ETA: {eta_minutes}m {eta_seconds_remainder}s"
+            else:
+                eta_str = "ETA: calculating..."
+            
+            print(f"\n{'─'*70}")
+            print(f"[{i}/{total_orders}] ({progress_pct:.0f}%) | {eta_str}")
+            print(f"Order: {order_number}")
+            print(f"{'─'*70}")
             
             # Take screenshot
             screenshot_path = shopee.take_chat_screenshot(order_number, screenshots_folder)
             
             if screenshot_path:
-                # Upload to Google Drive
-                print(f"  → Uploading to Google Drive...")
+                # Upload to Google Drive with retry
+                print(f"  📤 Uploading to Google Drive...")
                 gdrive_link = upload_to_gdrive(gdrive_service, screenshot_path, folder_id)
                 
                 if gdrive_link:
@@ -255,34 +568,65 @@ def main():
                         'order_number': order_number,
                         'gdrive_link': gdrive_link
                     })
-                    print(f"  ✓ Order {order_number} processed successfully!")
+                    # Save checkpoint
+                    save_checkpoint(order_number, gdrive_link)
+                    print(f"  ✅ Order {order_number} processed successfully!")
                 else:
-                    print(f"  ✗ Failed to upload screenshot for order {order_number}")
+                    failed_orders.append({'order': order_number, 'reason': 'Upload failed'})
+                    print(f"  ❌ Failed to upload screenshot")
             else:
-                print(f"  ✗ Failed to take screenshot for order {order_number}")
+                failed_orders.append({'order': order_number, 'reason': 'Screenshot failed'})
+                print(f"  ❌ Failed to take screenshot")
         
         # Step 5: Generate Excel report
-        print("\n[5/5] Generating Excel report...")
+        print(f"\n{'='*70}")
+        print("[5/5] 📊 Generating Excel report...")
+        print(f"{'='*70}")
+        
         if order_data:
             excel_file = create_excel_report(order_data, 'shopee_report.xlsx')
-            print(f"\n✓ Excel report created: {excel_file}")
             
-            print("\n" + "="*70)
-            print("✓ AUTOMATION COMPLETED SUCCESSFULLY!")
-            print("="*70)
-            print(f"\nSummary:")
-            print(f"  - Orders processed: {len(order_data)}")
-            print(f"  - Screenshots uploaded to Google Drive")
-            print(f"  - Excel report: shopee_report.xlsx")
-            print(f"\nNext steps:")
-            print(f"  1. Open shopee_report.xlsx")
+            # Final summary
+            total_time = time.time() - start_time
+            minutes = int(total_time // 60)
+            seconds = int(total_time % 60)
+            
+            print(f"\n{'='*70}")
+            print("✅ AUTOMATION COMPLETED!")
+            print(f"{'='*70}")
+            print(f"\n📊 SUMMARY:")
+            print(f"  ✓ Total processed: {len(order_data)}/{total_orders}")
+            print(f"  ✓ Successful: {len(order_data)}")
+            print(f"  ✗ Failed: {len(failed_orders)}")
+            print(f"  ⏱ Total time: {minutes}m {seconds}s")
+            print(f"  📁 Excel report: {excel_file}")
+            
+            if failed_orders:
+                print(f"\n❌ FAILED ORDERS:")
+                for fail in failed_orders:
+                    print(f"  - {fail['order']}: {fail['reason']}")
+                
+                # Save failed orders to file
+                with open('failed_orders.txt', 'w') as f:
+                    f.write(f"Failed orders ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})\n")
+                    f.write("="*50 + "\n\n")
+                    for fail in failed_orders:
+                        f.write(f"{fail['order']} - {fail['reason']}\n")
+                print(f"\n  📝 Failed orders saved to: failed_orders.txt")
+            
+            print(f"\n📋 NEXT STEPS:")
+            print(f"  1. Open {excel_file}")
             print(f"  2. Verify all data is correct")
             print(f"  3. Submit the report to Shopee CS")
+            
+            if failed_orders:
+                print(f"  4. Retry failed orders from failed_orders.txt")
         else:
             print("\n⚠ No orders were successfully processed.")
             
     except KeyboardInterrupt:
         print("\n\n⚠ Process interrupted by user.")
+        print("💾 Progress has been saved. You can resume later.")
     except Exception as e:
         print(f"\n✗ Error during automation: {e}")
         import traceback
