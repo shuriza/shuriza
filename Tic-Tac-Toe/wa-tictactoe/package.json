@@ -1,0 +1,25 @@
+{
+  "name": "wa-tictactoe",
+  "version": "1.0.0",
+  "description": "Tic-Tac-Toe Game Bot for WhatsApp Group",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "tictactoe",
+    "game"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "whatsapp-web.js": "^1.23.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
