@@ -55,7 +55,7 @@ export default function MediaEmbed({ platform, source_url, title, className = ''
                         href={source_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-2 text-sm text-brand-strong hover:text-brand underline"
+                        className="mt-2 text-sm text-brand-strong hover:text-brand-strong/80 underline"
                     >
                         Buka di tab baru
                     </a>
@@ -148,7 +148,7 @@ export default function MediaEmbed({ platform, source_url, title, className = ''
                 href={source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-brand-strong hover:text-brand underline"
+                className="text-sm text-brand-strong hover:text-brand-strong/80 underline"
             >
                 Buka di {platform.charAt(0).toUpperCase() + platform.slice(1)}
             </a>

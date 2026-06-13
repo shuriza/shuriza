@@ -55,7 +55,7 @@ function getCategoryBadgeColor(category: string): string {
         case 'sosial': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
         case 'olahraga': return 'bg-red-500/20 text-red-300 border-red-500/30';
         case 'pendidikan': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
-        default: return 'bg-brand-soft0/20 text-emerald-300 border-emerald-500/30';
+        default: return 'bg-brand/20 text-emerald-300 border-emerald-500/30';
     }
 }
 
@@ -117,7 +117,7 @@ export default function EventsIndex({ upcomingEvents, pastEvents }: EventsIndexP
                 <section className="relative py-20 md:py-28 bg-emerald-900 overflow-hidden">
                     {/* Dot pattern */}
                     <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                    <div className="absolute top-20 left-10 w-40 h-40 bg-brand-soft0/10 rounded-full blur-3xl"></div>
+                    <div className="absolute top-20 left-10 w-40 h-40 bg-brand/10 rounded-full blur-3xl"></div>
                     <div className="absolute bottom-20 right-10 w-60 h-60 bg-teal-500/10 rounded-full blur-3xl"></div>
 
                     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -166,7 +166,7 @@ export default function EventsIndex({ upcomingEvents, pastEvents }: EventsIndexP
 
                                         <div className="flex flex-col gap-3 text-sm">
                                             <div className="flex items-center gap-3 text-emerald-200/80">
-                                                <div className="w-8 h-8 rounded-lg bg-brand-soft0/20 flex items-center justify-center flex-shrink-0">
+                                                <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
                                                     <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
@@ -174,7 +174,7 @@ export default function EventsIndex({ upcomingEvents, pastEvents }: EventsIndexP
                                                 <span>{formatDate(event.event_date)}</span>
                                             </div>
                                             <div className="flex items-center gap-3 text-emerald-200/80">
-                                                <div className="w-8 h-8 rounded-lg bg-brand-soft0/20 flex items-center justify-center flex-shrink-0">
+                                                <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
                                                     <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />

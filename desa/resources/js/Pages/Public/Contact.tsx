@@ -397,7 +397,7 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-bold text-ink-1 mb-2">Pertanyaan yang Sering Diajukan</h2>
-                        <div className="w-20 h-1 bg-brand-soft0 mx-auto rounded-full"></div>
+                        <div className="w-20 h-1 bg-brand mx-auto rounded-full"></div>
                     </div>
 
                     <div className="space-y-3">

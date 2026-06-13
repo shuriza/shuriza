@@ -266,9 +266,10 @@ export default function DestinationShow({ destination, relatedDestinations }: De
                 >
                     <button
                         onClick={() => setSelectedImage(null)}
+                        aria-label="Tutup"
                         className="absolute top-4 right-4 w-10 h-10 bg-surface-1/10 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-surface-1/20 transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>

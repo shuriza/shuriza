@@ -188,7 +188,7 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                                             <div className="absolute bottom-0 left-0 right-0 p-4">
                                                 <p className="text-white font-medium text-sm truncate">{photo.title}</p>
                                                 {photo.album && (
-                                                    <span className="inline-block mt-1.5 px-2.5 py-0.5 bg-brand-soft0/80 backdrop-blur-sm text-white text-xs font-medium rounded-full">
+                                                    <span className="inline-block mt-1.5 px-2.5 py-0.5 bg-brand/80 backdrop-blur-sm text-white text-xs font-medium rounded-full">
                                                         {photo.album}
                                                     </span>
                                                 )}
@@ -264,9 +264,10 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                     {/* Close Button */}
                     <button
                         onClick={closeLightbox}
+                        aria-label="Tutup"
                         className="absolute top-4 right-4 z-10 w-10 h-10 bg-surface-1/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-surface-1/20 transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -274,9 +275,10 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                     {/* Previous Button */}
                     <button
                         onClick={() => navigateLightbox('prev')}
+                        aria-label="Foto sebelumnya"
                         className="absolute left-4 z-10 w-12 h-12 bg-surface-1/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-surface-1/20 transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
@@ -284,9 +286,10 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                     {/* Next Button */}
                     <button
                         onClick={() => navigateLightbox('next')}
+                        aria-label="Foto berikutnya"
                         className="absolute right-4 z-10 w-12 h-12 bg-surface-1/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-surface-1/20 transition-colors"
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
@@ -304,7 +307,7 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                                 {photos.data[lightbox.index].title}
                             </p>
                             {photos.data[lightbox.index].album && (
-                                <span className="inline-block mt-2 px-3 py-1 bg-brand-soft0/30 backdrop-blur-sm text-emerald-200 text-sm font-medium rounded-full border border-emerald-500/30">
+                                <span className="inline-block mt-2 px-3 py-1 bg-brand/30 backdrop-blur-sm text-emerald-200 text-sm font-medium rounded-full border border-emerald-500/30">
                                     {photos.data[lightbox.index].album}
                                 </span>
                             )}

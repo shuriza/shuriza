@@ -109,7 +109,7 @@ export default function AnnouncementsIndex({ announcements, pinned }: Announceme
                     {/* Dot pattern */}
                     <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                     <div className="absolute top-20 right-10 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-20 left-10 w-40 h-40 bg-brand-soft0/10 rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-20 left-10 w-40 h-40 bg-brand/10 rounded-full blur-3xl"></div>
 
                     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center gap-4 mb-12">

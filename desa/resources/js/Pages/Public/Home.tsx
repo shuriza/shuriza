@@ -860,7 +860,7 @@ export default function Home({
                             )}
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-semibold text-ink-2 mb-2">Nama</label>
+                                    <label htmlFor="submit-name" className="block text-sm font-semibold text-ink-2 mb-2">Nama</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                             <svg className="w-5 h-5 text-ink-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -868,6 +868,7 @@ export default function Home({
                                             </svg>
                                         </div>
                                         <input
+                                            id="submit-name"
                                             type="text"
                                             value={data.name}
                                             onChange={(e) => setData('name', e.target.value)}
@@ -880,7 +881,7 @@ export default function Home({
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-ink-2 mb-2">Kategori</label>
+                                    <label htmlFor="submit-category" className="block text-sm font-semibold text-ink-2 mb-2">Kategori</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                             <svg className="w-5 h-5 text-ink-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -888,6 +889,7 @@ export default function Home({
                                             </svg>
                                         </div>
                                         <select
+                                            id="submit-category"
                                             value={data.category}
                                             onChange={(e) => setData('category', e.target.value)}
                                             className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-line focus:border-brand-ring focus:ring-2 focus:ring-brand-soft transition-all duration-200 text-base appearance-none bg-surface-1"
@@ -905,7 +907,7 @@ export default function Home({
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-ink-2 mb-2">Judul</label>
+                                    <label htmlFor="submit-title" className="block text-sm font-semibold text-ink-2 mb-2">Judul</label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                             <svg className="w-5 h-5 text-ink-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -913,6 +915,7 @@ export default function Home({
                                             </svg>
                                         </div>
                                         <input
+                                            id="submit-title"
                                             type="text"
                                             value={data.title}
                                             onChange={(e) => setData('title', e.target.value)}
@@ -925,8 +928,9 @@ export default function Home({
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-ink-2 mb-2">Isi Informasi</label>
+                                    <label htmlFor="submit-content" className="block text-sm font-semibold text-ink-2 mb-2">Isi Informasi</label>
                                     <textarea
+                                        id="submit-content"
                                         rows={5}
                                         value={data.content}
                                         onChange={(e) => setData('content', e.target.value)}

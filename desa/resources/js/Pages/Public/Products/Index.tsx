@@ -97,7 +97,7 @@ export default function ProductsIndex({ products, filter }: ProductsIndexProps) 
                 {/* Decorative background patterns */}
                 <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
                 <div className="absolute top-10 left-10 w-72 h-72 bg-teal-600/20 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-10 right-10 w-56 h-56 bg-brand-soft0/15 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-10 right-10 w-56 h-56 bg-brand/15 rounded-full blur-3xl"></div>
 
                 {/* Decorative shopping bag SVG */}
                 <div className="absolute right-8 md:right-16 top-1/2 -translate-y-1/2 opacity-10">

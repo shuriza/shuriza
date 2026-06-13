@@ -210,7 +210,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                                         )}
                                                     </div>
                                                     {globalIndex === activeIndex && (
-                                                        <span className="text-brand flex-shrink-0 text-sm">→</span>
+                                                        <span className="text-brand-strong flex-shrink-0 text-sm">→</span>
                                                     )}
                                                 </button>
                                             );
