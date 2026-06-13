@@ -250,7 +250,7 @@ function QuickReactions({
                         className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all duration-200 border ${
                             isActive
                                 ? 'bg-brand-soft border-emerald-300 shadow-sm'
-                                : 'bg-surface-1 border-line hover:border-gray-300 hover:bg-surface-2'
+                                : 'bg-surface-1 border-line hover:border-line-strong hover:bg-surface-2'
                         } ${isAnimatingThis ? 'animate-bounce scale-110' : ''}`}
                     >
                         <span className="text-sm">{emoji}</span>
@@ -629,7 +629,7 @@ export default function MemoriesIndex({ memories, pinnedMemories, albums, years,
             <Head title="Kenangan Desa Muneng" />
 
             {/* ─── Compact Hero ────────────────────────────────────────────────── */}
-            <section className="relative bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 py-12 md:py-16 overflow-hidden">
+            <section className="relative bg-gradient-to-br from-brand via-brand-strong to-emerald-800 py-12 md:py-16 overflow-hidden">
                 {/* Decorative elements */}
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-72 h-72 bg-surface-1 rounded-full -translate-x-1/2 -translate-y-1/2" />
@@ -662,7 +662,7 @@ export default function MemoriesIndex({ memories, pinnedMemories, albums, years,
                                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                             filters.platform === platform
                                                 ? 'bg-brand text-white shadow-sm'
-                                                : 'bg-surface-3 text-ink-3 hover:bg-gray-200'
+                                                : 'bg-surface-3 text-ink-3 hover:bg-line'
                                         }`}
                                     >
                                         {getPlatformLabel(platform)}
@@ -670,7 +670,7 @@ export default function MemoriesIndex({ memories, pinnedMemories, albums, years,
                                 ))}
                             </div>
 
-                            <div className="w-px h-6 bg-gray-200 hidden sm:block" />
+                            <div className="w-px h-6 bg-line hidden sm:block" />
 
                             {/* Type Pills */}
                             <div className="flex items-center gap-1 flex-wrap">
@@ -682,7 +682,7 @@ export default function MemoriesIndex({ memories, pinnedMemories, albums, years,
                                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                             filters.type === type
                                                 ? 'bg-brand text-white shadow-sm'
-                                                : 'bg-surface-3 text-ink-3 hover:bg-gray-200'
+                                                : 'bg-surface-3 text-ink-3 hover:bg-line'
                                         }`}
                                     >
                                         {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -705,7 +705,7 @@ export default function MemoriesIndex({ memories, pinnedMemories, albums, years,
                                                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                                     filters.year === String(year)
                                                         ? 'bg-brand text-white shadow-sm'
-                                                        : 'bg-surface-3 text-ink-3 hover:bg-gray-200'
+                                                        : 'bg-surface-3 text-ink-3 hover:bg-line'
                                                 }`}
                                             >
                                                 {year}
@@ -725,7 +725,7 @@ export default function MemoriesIndex({ memories, pinnedMemories, albums, years,
                                                 className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                                                     filters.album === album.slug
                                                         ? 'bg-brand text-white shadow-sm'
-                                                        : 'bg-surface-3 text-ink-3 hover:bg-gray-200'
+                                                        : 'bg-surface-3 text-ink-3 hover:bg-line'
                                                 }`}
                                             >
                                                 {album.name}

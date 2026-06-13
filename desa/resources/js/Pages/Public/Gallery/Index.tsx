@@ -135,7 +135,7 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
             </section>
 
             {/* Filter Section */}
-            <section className="sticky top-16 z-30 bg-surface-1/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+            <section className="sticky top-16 z-30 bg-surface-1/80 backdrop-blur-md border-b border-line-subtle shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
                         <button
@@ -143,7 +143,7 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                             className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                                 !filter
                                     ? 'bg-brand text-white shadow-sm'
-                                    : 'bg-gray-100 text-ink-2 hover:bg-brand-soft hover:text-brand-strong'
+                                    : 'bg-surface-3 text-ink-2 hover:bg-brand-soft hover:text-brand-strong'
                             }`}
                         >
                             Semua
@@ -155,7 +155,7 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                                 className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                                     filter === album
                                         ? 'bg-brand text-white shadow-sm'
-                                        : 'bg-gray-100 text-ink-2 hover:bg-brand-soft hover:text-brand-strong'
+                                        : 'bg-surface-3 text-ink-2 hover:bg-brand-soft hover:text-brand-strong'
                                 }`}
                             >
                                 {album}
@@ -236,7 +236,7 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                         </>
                     ) : (
                         <div className="text-center py-20">
-                            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div className="w-20 h-20 bg-surface-3 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <svg className="w-10 h-10 text-ink-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -307,7 +307,7 @@ export default function GalleryIndex({ photos, albums, filter }: Props) {
                                 {photos.data[lightbox.index].title}
                             </p>
                             {photos.data[lightbox.index].album && (
-                                <span className="inline-block mt-2 px-3 py-1 bg-brand/30 backdrop-blur-sm text-emerald-200 text-sm font-medium rounded-full border border-emerald-500/30">
+                                <span className="inline-block mt-2 px-3 py-1 bg-brand/30 backdrop-blur-sm text-emerald-200 text-sm font-medium rounded-full border border-brand-ring/30">
                                     {photos.data[lightbox.index].album}
                                 </span>
                             )}

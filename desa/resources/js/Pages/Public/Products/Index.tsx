@@ -145,7 +145,7 @@ export default function ProductsIndex({ products, filter }: ProductsIndexProps) 
                                 onClick={() => applyFilter(cat.value)}
                                 className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
                                     (filter || 'all') === cat.value
-                                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 scale-105'
+                                        ? 'bg-gradient-to-r from-brand to-teal-600 text-white shadow-lg shadow-brand-ring/25 scale-105'
                                         : 'bg-surface-1 text-ink-3 border border-line hover:border-emerald-300 hover:text-brand-strong hover:shadow-md hover:-translate-y-0.5'
                                 }`}
                             >
@@ -276,7 +276,7 @@ export default function ProductsIndex({ products, filter }: ProductsIndexProps) 
                                                 )}
                                                 <Link
                                                     href={`/umkm/${product.slug}`}
-                                                    className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-line text-ink-3 text-sm font-semibold rounded-xl hover:bg-surface-2 hover:border-gray-300 transition-colors duration-200 ${
+                                                    className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-line text-ink-3 text-sm font-semibold rounded-xl hover:bg-surface-2 hover:border-line-strong transition-colors duration-200 ${
                                                         product.contact_whatsapp || product.contact_phone ? '' : 'flex-1'
                                                     }`}
                                                 >

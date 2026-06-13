@@ -125,7 +125,7 @@ export default function Map({ destinations, center }: MapProps) {
 
             {/* Map Section */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
-                <div className="bg-surface-1 rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="bg-surface-1 rounded-2xl shadow-xl border border-line-subtle overflow-hidden">
                     <iframe
                         title="Peta Desa Muneng"
                         src={mapUrl}
@@ -163,8 +163,8 @@ export default function Map({ destinations, center }: MapProps) {
 
                 {/* Destination Cards */}
                 {filtered.length === 0 ? (
-                    <div className="text-center py-16 bg-surface-1 rounded-2xl border border-gray-100">
-                        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="text-center py-16 bg-surface-1 rounded-2xl border border-line-subtle">
+                        <svg className="w-16 h-16 text-line-strong mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -176,7 +176,7 @@ export default function Map({ destinations, center }: MapProps) {
                             <Link
                                 key={dest.id}
                                 href={`/destinasi/${dest.slug}`}
-                                className="group bg-surface-1 rounded-2xl border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200"
+                                className="group bg-surface-1 rounded-2xl border border-line-subtle p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200"
                             >
                                 <div className="flex items-start gap-4">
                                     <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${categoryColor(dest.category)}`}>
@@ -199,7 +199,7 @@ export default function Map({ destinations, center }: MapProps) {
                                             </p>
                                         )}
                                     </div>
-                                    <svg className="w-5 h-5 text-gray-300 group-hover:text-emerald-500 transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 text-line-strong group-hover:text-brand-ring transition-colors flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                     </svg>
                                 </div>

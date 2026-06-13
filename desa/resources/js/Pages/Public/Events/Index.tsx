@@ -55,7 +55,7 @@ function getCategoryBadgeColor(category: string): string {
         case 'sosial': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
         case 'olahraga': return 'bg-red-500/20 text-red-300 border-red-500/30';
         case 'pendidikan': return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
-        default: return 'bg-brand/20 text-emerald-300 border-emerald-500/30';
+        default: return 'bg-brand/20 text-emerald-300 border-brand-ring/30';
     }
 }
 
@@ -126,7 +126,7 @@ export default function EventsIndex({ upcomingEvents, pastEvents }: EventsIndexP
                                 <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
                                 <h2 className="text-3xl md:text-4xl font-bold text-white">Acara Mendatang</h2>
                             </div>
-                            <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-emerald-500/50 to-transparent"></div>
+                            <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-brand-ring/50 to-transparent"></div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -134,7 +134,7 @@ export default function EventsIndex({ upcomingEvents, pastEvents }: EventsIndexP
                                 <Link
                                     key={event.id}
                                     href={`/acara/${event.slug}`}
-                                    className="group relative bg-surface-1/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-emerald-400/50 transition-all duration-300 overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10"
+                                    className="group relative bg-surface-1/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-emerald-400/50 transition-all duration-300 overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:shadow-brand-ring/10"
                                 >
                                     {/* Top accent border */}
                                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-400"></div>
@@ -227,7 +227,7 @@ export default function EventsIndex({ upcomingEvents, pastEvents }: EventsIndexP
                                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                                         {/* Date badge */}
-                                        <div className="flex-shrink-0 w-20 md:w-24 flex flex-col items-center justify-center bg-gradient-to-b from-emerald-50 to-teal-50 border-r border-line">
+                                        <div className="flex-shrink-0 w-20 md:w-24 flex flex-col items-center justify-center bg-gradient-to-b from-brand-soft to-teal-50 border-r border-line">
                                             <span className="text-2xl md:text-3xl font-bold text-brand-strong">{formatDay(event.event_date)}</span>
                                             <span className="text-xs font-semibold text-brand-strong uppercase">{formatMonth(event.event_date)}</span>
                                         </div>
@@ -285,7 +285,7 @@ export default function EventsIndex({ upcomingEvents, pastEvents }: EventsIndexP
                                                     href={link.url}
                                                     className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 inline-block ${
                                                         link.active
-                                                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/25'
+                                                            ? 'bg-gradient-to-r from-brand to-teal-600 text-white shadow-md shadow-brand-ring/25'
                                                             : 'text-ink-3 hover:bg-brand-soft hover:text-brand-strong'
                                                     }`}
                                                     dangerouslySetInnerHTML={{ __html: link.label }}

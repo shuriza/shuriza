@@ -76,7 +76,7 @@ export default function UserDashboard({ myMemories, myProducts, stats, auth }: U
                 );
             default:
                 return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-3 text-gray-800">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-3 text-ink-1">
                         {status}
                     </span>
                 );
@@ -88,7 +88,7 @@ export default function UserDashboard({ myMemories, myProducts, stats, auth }: U
             case 'youtube':
                 return <span className="text-red-500 text-xs font-medium">YouTube</span>;
             case 'tiktok':
-                return <span className="text-gray-800 text-xs font-medium">TikTok</span>;
+                return <span className="text-ink-1 text-xs font-medium">TikTok</span>;
             case 'facebook':
                 return <span className="text-blue-600 text-xs font-medium">Facebook</span>;
             case 'instagram':
@@ -215,8 +215,8 @@ export default function UserDashboard({ myMemories, myProducts, stats, auth }: U
                         onClick={() => setActiveTab('kenangan')}
                         className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors duration-200 ${
                             activeTab === 'kenangan'
-                                ? 'border-emerald-600 text-brand-strong'
-                                : 'border-transparent text-ink-3 hover:text-ink-2 hover:border-gray-300'
+                                ? 'border-brand text-brand-strong'
+                                : 'border-transparent text-ink-3 hover:text-ink-2 hover:border-line-strong'
                         }`}
                     >
                         <span className="flex items-center gap-2">
@@ -230,8 +230,8 @@ export default function UserDashboard({ myMemories, myProducts, stats, auth }: U
                         onClick={() => setActiveTab('produk')}
                         className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors duration-200 ${
                             activeTab === 'produk'
-                                ? 'border-emerald-600 text-brand-strong'
-                                : 'border-transparent text-ink-3 hover:text-ink-2 hover:border-gray-300'
+                                ? 'border-brand text-brand-strong'
+                                : 'border-transparent text-ink-3 hover:text-ink-2 hover:border-line-strong'
                         }`}
                     >
                         <span className="flex items-center gap-2">

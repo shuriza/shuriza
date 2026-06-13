@@ -39,7 +39,7 @@ function getCategoryColor(category: string): string {
         case 'fasilitas': return 'bg-blue-100 text-blue-700';
         case 'wisata': return 'bg-brand-soft text-brand-strong';
         case 'suasana': return 'bg-amber-100 text-amber-700';
-        default: return 'bg-gray-100 text-ink-2';
+        default: return 'bg-surface-3 text-ink-2';
     }
 }
 
@@ -131,7 +131,7 @@ export default function DestinationShow({ destination, relatedDestinations }: De
                                         onClick={() => setSelectedImage(image.url)}
                                         className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 hover:scale-105 ${
                                             (selectedImage || allImages[0].url) === image.url
-                                                ? 'border-emerald-500 ring-2 ring-emerald-200 shadow-md'
+                                                ? 'border-brand-ring ring-2 ring-emerald-200 shadow-md'
                                                 : 'border-transparent hover:border-emerald-300'
                                         }`}
                                     >
@@ -158,7 +158,7 @@ export default function DestinationShow({ destination, relatedDestinations }: De
                                 {/* Description */}
                                 <div className="mb-8">
                                     <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-1 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
+                                        <div className="w-1 h-8 bg-gradient-to-b from-brand-ring to-teal-500 rounded-full"></div>
                                         <h2 className="text-2xl font-bold text-ink-1">Tentang</h2>
                                     </div>
                                     <p className="text-ink-2 text-lg leading-relaxed">{destination.description}</p>

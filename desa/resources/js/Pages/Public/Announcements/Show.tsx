@@ -141,7 +141,7 @@ export default function AnnouncementShow({ announcement, relatedAnnouncements }:
                     </div>
 
                     {/* Share & Like Section */}
-                    <div className="mt-10 pt-8 border-t border-gray-100">
+                    <div className="mt-10 pt-8 border-t border-line-subtle">
                         <div className="flex flex-wrap items-center gap-4">
                             <LikeButton
                                 likeable_type="announcement"
@@ -155,7 +155,7 @@ export default function AnnouncementShow({ announcement, relatedAnnouncements }:
                                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 ${
                                     copied
                                         ? 'bg-brand-soft border-emerald-200 text-brand-strong'
-                                        : 'bg-white border-gray-200 text-ink-3 hover:bg-surface-2 hover:text-brand-strong hover:border-emerald-200'
+                                        : 'bg-white border-line text-ink-3 hover:bg-surface-2 hover:text-brand-strong hover:border-emerald-200'
                                 }`}
                             >
                                 {copied ? (

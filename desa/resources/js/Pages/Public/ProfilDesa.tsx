@@ -77,7 +77,7 @@ export default function ProfilDesa({ sejarah, deskripsi, visi, misi, profil, dem
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                         <div>
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-1 h-12 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
+                                <div className="w-1 h-12 bg-gradient-to-b from-brand-ring to-teal-500 rounded-full"></div>
                                 <div>
                                     <h2 className="text-3xl font-bold text-ink-1">Tentang Desa Muneng</h2>
                                     <p className="text-brand-strong text-sm font-medium mt-1">Sejarah & Deskripsi</p>
@@ -242,7 +242,7 @@ export default function ProfilDesa({ sejarah, deskripsi, visi, misi, profil, dem
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Visi */}
-                        <div className="relative bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-8 text-white overflow-hidden">
+                        <div className="relative bg-gradient-to-br from-brand to-teal-700 rounded-2xl p-8 text-white overflow-hidden">
                             <div className="absolute top-0 right-0 opacity-10">
                                 <svg className="w-32 h-32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -260,7 +260,7 @@ export default function ProfilDesa({ sejarah, deskripsi, visi, misi, profil, dem
                                     <h3 className="text-2xl font-bold">Visi</h3>
                                 </div>
                                 {visi && (
-                                    <p className="text-emerald-50 leading-relaxed text-lg italic">"{visi}"</p>
+                                    <p className="text-brand-soft leading-relaxed text-lg italic">"{visi}"</p>
                                 )}
                             </div>
                         </div>
@@ -279,7 +279,7 @@ export default function ProfilDesa({ sejarah, deskripsi, visi, misi, profil, dem
                                 <div className="space-y-4">
                                     {misi.split('\n').map((item, index) => (
                                         <div key={index} className="flex items-start gap-3 group">
-                                            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm group-hover:scale-110 transition-transform">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-brand-ring to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm group-hover:scale-110 transition-transform">
                                                 <span className="text-xs font-bold text-white">{index + 1}</span>
                                             </div>
                                             <p className="text-ink-2 leading-relaxed">{item.replace(/^\d+\.\s*/, '')}</p>
@@ -301,7 +301,7 @@ export default function ProfilDesa({ sejarah, deskripsi, visi, misi, profil, dem
                             <div className="w-20 h-1 bg-brand-ring mx-auto rounded-full"></div>
                         </div>
                         <div className="bg-surface-1 rounded-2xl shadow-sm border border-line overflow-hidden max-w-4xl mx-auto">
-                            <div className="divide-y divide-gray-100">
+                            <div className="divide-y divide-line-subtle">
                                 {profil.filter(item => !['latitude', 'longitude'].includes(item.key)).map((item, index) => (
                                     <div key={item.key} className={`flex items-center px-6 py-4 hover:bg-brand-soft/50 transition-colors ${index % 2 === 0 ? 'bg-surface-1' : 'bg-surface-2/50'}`}>
                                         <div className="w-10 h-10 bg-brand-soft rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
@@ -365,7 +365,7 @@ export default function ProfilDesa({ sejarah, deskripsi, visi, misi, profil, dem
                                     <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto bg-gradient-to-br ${
                                         index % 3 === 0 ? 'from-emerald-400 to-teal-500' :
                                         index % 3 === 1 ? 'from-teal-400 to-cyan-500' :
-                                        'from-cyan-400 to-emerald-500'
+                                        'from-cyan-400 to-brand-ring'
                                     } shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

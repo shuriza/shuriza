@@ -372,7 +372,7 @@ export default function MemoriesCreate() {
                                         <button
                                             type="submit"
                                             disabled={processing || !data.source_url}
-                                            className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="px-8 py-3 bg-gradient-to-r from-brand to-teal-600 text-white font-semibold rounded-xl hover:from-brand-strong hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {processing ? (
                                                 <span className="flex items-center gap-2">

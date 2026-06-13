@@ -34,7 +34,7 @@ function getCategoryIcon(category: string): string {
 function getCategoryColor(category: string): { badge: string; accent: string } {
     switch (category?.toLowerCase()) {
         case 'fasilitas': return { badge: 'bg-blue-100 text-blue-700 border-blue-200', accent: 'from-blue-500 to-blue-600' };
-        case 'wisata': return { badge: 'bg-brand-soft text-brand-strong border-brand-soft', accent: 'from-emerald-500 to-emerald-600' };
+        case 'wisata': return { badge: 'bg-brand-soft text-brand-strong border-brand-soft', accent: 'from-brand-ring to-brand' };
         case 'suasana': return { badge: 'bg-amber-100 text-amber-700 border-amber-200', accent: 'from-amber-500 to-amber-600' };
         default: return { badge: 'bg-surface-3 text-ink-2 border-line', accent: 'from-gray-500 to-gray-600' };
     }
@@ -105,7 +105,7 @@ export default function DestinationsIndex({ destinations, filter }: Destinations
                                 onClick={() => applyFilter(tab.value)}
                                 className={`inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
                                     (filter || '') === tab.value
-                                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/25 scale-105'
+                                        ? 'bg-gradient-to-r from-brand to-teal-600 text-white shadow-lg shadow-brand-ring/25 scale-105'
                                         : 'bg-surface-1 text-ink-3 border border-line hover:border-emerald-300 hover:text-brand-strong hover:shadow-md hover:-translate-y-0.5'
                                 }`}
                             >
@@ -140,7 +140,7 @@ export default function DestinationsIndex({ destinations, filter }: Destinations
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300"></div>
                                                 </>
                                             ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-emerald-100 via-teal-50 to-emerald-50 flex items-center justify-center">
+                                                <div className="w-full h-full bg-gradient-to-br from-emerald-100 via-teal-50 to-brand-soft flex items-center justify-center">
                                                     <div className="text-center">
                                                         <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-emerald-200/50 flex items-center justify-center">
                                                             <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

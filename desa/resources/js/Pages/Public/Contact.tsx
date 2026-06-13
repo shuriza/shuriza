@@ -112,7 +112,7 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                         {/* Left: Contact Form */}
                         <div>
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-1 h-12 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
+                                <div className="w-1 h-12 bg-gradient-to-b from-brand-ring to-teal-500 rounded-full"></div>
                                 <div>
                                     <h2 className="text-2xl font-bold text-ink-1">Kirim Pesan</h2>
                                     <p className="text-brand-strong text-sm font-medium mt-1">Kami akan merespon secepatnya</p>
@@ -148,7 +148,7 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                                             type="text"
                                             value={data.name}
                                             onChange={(e) => setData('name', e.target.value)}
-                                            className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                            className="w-full pl-11 pr-4 py-2.5 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                             placeholder="Masukkan nama Anda"
                                         />
                                     </div>
@@ -170,7 +170,7 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                                             type="email"
                                             value={data.email}
                                             onChange={(e) => setData('email', e.target.value)}
-                                            className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                            className="w-full pl-11 pr-4 py-2.5 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                             placeholder="contoh@email.com"
                                         />
                                     </div>
@@ -192,7 +192,7 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                                             type="text"
                                             value={data.subject}
                                             onChange={(e) => setData('subject', e.target.value)}
-                                            className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                            className="w-full pl-11 pr-4 py-2.5 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                             placeholder="Subjek pesan"
                                         />
                                     </div>
@@ -214,7 +214,7 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                                             value={data.message}
                                             onChange={(e) => setData('message', e.target.value)}
                                             rows={5}
-                                            className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors resize-y"
+                                            className="w-full pl-11 pr-4 py-2.5 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors resize-y"
                                             placeholder="Tulis pesan Anda di sini..."
                                         />
                                     </div>

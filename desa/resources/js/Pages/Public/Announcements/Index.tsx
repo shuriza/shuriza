@@ -238,7 +238,7 @@ export default function AnnouncementsIndex({ announcements, pinned }: Announceme
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                                 </div>
                                             ) : (
-                                                <div className="aspect-video bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 flex items-center justify-center relative overflow-hidden">
+                                                <div className="aspect-video bg-gradient-to-br from-brand-soft via-teal-50 to-emerald-100 flex items-center justify-center relative overflow-hidden">
                                                     <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(135deg, rgba(16,185,129,0.1) 25%, transparent 25%, transparent 50%, rgba(16,185,129,0.1) 50%, rgba(16,185,129,0.1) 75%, transparent 75%)', backgroundSize: '20px 20px' }}></div>
                                                     <svg className="w-12 h-12 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
@@ -308,7 +308,7 @@ export default function AnnouncementsIndex({ announcements, pinned }: Announceme
                                                     href={link.url}
                                                     className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 inline-block ${
                                                         link.active
-                                                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/25'
+                                                            ? 'bg-gradient-to-r from-brand to-teal-600 text-white shadow-md shadow-brand-ring/25'
                                                             : 'text-ink-3 hover:bg-surface-1 hover:text-brand-strong hover:shadow-sm'
                                                     }`}
                                                     dangerouslySetInnerHTML={{ __html: link.label }}

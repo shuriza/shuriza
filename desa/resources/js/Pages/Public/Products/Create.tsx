@@ -104,7 +104,7 @@ export default function ProductCreate() {
                                 type="text"
                                 value={data.name}
                                 onChange={(e) => setData('name', e.target.value)}
-                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                 placeholder="Contoh: Keripik Singkong Bu Sari"
                             />
                             {errors.name && <p className="mt-1.5 text-sm text-red-600">{errors.name}</p>}
@@ -120,7 +120,7 @@ export default function ProductCreate() {
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
                                 rows={4}
-                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors resize-none"
+                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors resize-none"
                                 placeholder="Jelaskan produk atau jasa Anda..."
                             />
                             {errors.description && <p className="mt-1.5 text-sm text-red-600">{errors.description}</p>}
@@ -137,7 +137,7 @@ export default function ProductCreate() {
                                     type="number"
                                     value={data.price}
                                     onChange={(e) => setData('price', e.target.value)}
-                                    className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                    className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                     placeholder="15000"
                                     min="0"
                                 />
@@ -153,7 +153,7 @@ export default function ProductCreate() {
                                     type="text"
                                     value={data.price_note}
                                     onChange={(e) => setData('price_note', e.target.value)}
-                                    className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                    className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                     placeholder="per kg, per bungkus, nego"
                                 />
                                 {errors.price_note && <p className="mt-1.5 text-sm text-red-600">{errors.price_note}</p>}
@@ -169,7 +169,7 @@ export default function ProductCreate() {
                                 id="category"
                                 value={data.category}
                                 onChange={(e) => setData('category', e.target.value)}
-                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                             >
                                 <option value="">Pilih kategori...</option>
                                 {categories.map((cat) => (
@@ -189,7 +189,7 @@ export default function ProductCreate() {
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => setData('image', e.target.files?.[0] || null)}
-                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-soft file:text-brand-strong hover:file:bg-brand-soft"
+                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand-soft file:text-brand-strong hover:file:bg-brand-soft"
                             />
                             <p className="mt-1 text-xs text-ink-4">Format: JPG, PNG. Maksimal 2MB</p>
                             {errors.image && <p className="mt-1.5 text-sm text-red-600">{errors.image}</p>}
@@ -197,7 +197,7 @@ export default function ProductCreate() {
 
                         {/* Divider */}
                         <div className="border-t border-line pt-6">
-                            <h3 className="text-base font-bold text-gray-800 mb-4">Informasi Kontak</h3>
+                            <h3 className="text-base font-bold text-ink-1 mb-4">Informasi Kontak</h3>
                         </div>
 
                         {/* Contact Name */}
@@ -210,7 +210,7 @@ export default function ProductCreate() {
                                 type="text"
                                 value={data.contact_name}
                                 onChange={(e) => setData('contact_name', e.target.value)}
-                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                 placeholder="Nama Anda"
                             />
                             {errors.contact_name && <p className="mt-1.5 text-sm text-red-600">{errors.contact_name}</p>}
@@ -227,7 +227,7 @@ export default function ProductCreate() {
                                     type="tel"
                                     value={data.contact_phone}
                                     onChange={(e) => setData('contact_phone', e.target.value)}
-                                    className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                    className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                     placeholder="081234567890"
                                 />
                                 {errors.contact_phone && <p className="mt-1.5 text-sm text-red-600">{errors.contact_phone}</p>}
@@ -241,7 +241,7 @@ export default function ProductCreate() {
                                     type="tel"
                                     value={data.contact_whatsapp}
                                     onChange={(e) => setData('contact_whatsapp', e.target.value)}
-                                    className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-brand transition-colors"
+                                    className="w-full px-4 py-3 border border-line rounded-xl focus:ring-2 focus:ring-brand-ring focus:border-brand transition-colors"
                                     placeholder="081234567890"
                                 />
                                 {errors.contact_whatsapp && <p className="mt-1.5 text-sm text-red-600">{errors.contact_whatsapp}</p>}
@@ -253,7 +253,7 @@ export default function ProductCreate() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+                                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-brand to-teal-600 text-white font-semibold rounded-xl hover:from-brand-strong hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
                             >
                                 {processing ? (
                                     <>
@@ -274,7 +274,7 @@ export default function ProductCreate() {
                             </button>
                             <Link
                                 href="/umkm"
-                                className="px-6 py-3 text-ink-3 font-medium hover:text-gray-800 transition-colors"
+                                className="px-6 py-3 text-ink-3 font-medium hover:text-ink-1 transition-colors"
                             >
                                 Batal
                             </Link>
