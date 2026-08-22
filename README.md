@@ -4,7 +4,7 @@
 
 I am a web developer from Kediri, East Java. I build applications that simplify operational workflows, from attendance reporting to task automation and content management.
 
-[Portfolio](https://portofolio-gilt-zeta-13.vercel.app) | [CV](https://portofolio-gilt-zeta-13.vercel.app/cv) | [Email](mailto:firdausmfirdaus657@gmail.com)
+[Portfolio](https://shuriza.tech) | [CV](https://shuriza.tech/cv) | [Email](mailto:firdausmfirdaus657@gmail.com)
 
 ## What I Work With
 
@@ -33,7 +33,7 @@ An integrated task-management application with Google Classroom sync, Gemini ass
 
 A responsive portfolio with a protected admin area for managing projects, skills, and profile content. It uses Supabase Auth, PostgreSQL, and Row Level Security for server-side access control.
 
-[Live portfolio](https://portofolio-gilt-zeta-13.vercel.app)
+[Live portfolio](https://shuriza.tech)
 
 `Next.js 16` `TypeScript` `Supabase` `PostgreSQL` `Tailwind CSS`
 
@@ -47,4 +47,4 @@ A responsive portfolio with a protected admin area for managing projects, skills
 
 - Email: [firdausmfirdaus657@gmail.com](mailto:firdausmfirdaus657@gmail.com)
 - GitHub: [github.com/shuriza](https://github.com/shuriza)
-- Portfolio: [portofolio-gilt-zeta-13.vercel.app](https://portofolio-gilt-zeta-13.vercel.app)
+- Portfolio: [shuriza.tech](https://shuriza.tech)
