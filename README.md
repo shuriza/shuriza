@@ -1,45 +1,50 @@
-<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=28&pause=1000&color=22D3EE&background=0A0A0F00&vCenter=true&width=600&lines=Hi%2C+I'm+Shuriza;Fullstack+Web+Developer;Building+modern+web+apps" alt="Typing SVG" /></a>
+# M. Firdaus Suryaningrat
 
----
+**Junior Fullstack Web Developer | Laravel, Next.js, and MySQL**
 
-### About Me
+I am a D3 Manajemen Informatika graduate from Kediri, East Java. I have completed my academic requirements and am awaiting my graduation ceremony in September 2026. I build web applications that simplify operational workflows, from attendance reporting to task automation and content management.
 
-Fullstack Web Developer from Kediri, Jawa Timur.  
-I build modern, performant, and user-friendly web applications.
+[Portfolio](https://portofolio-gilt-zeta-13.vercel.app) | [CV](https://portofolio-gilt-zeta-13.vercel.app/cv) | [Email](mailto:firdausmfirdaus657@gmail.com)
 
-- 🔭 Currently working on **[Shuriza Store](https://shurizastore.my.id/)**
-- 🌱 Learning **Three.js, System Design**
-- 💬 Ask me about **React, Next.js, Laravel, TypeScript**
-- 📫 Reach me at **firdausmfirdaus657@gmail.com**
+## What I Work With
 
----
+- **Backend:** PHP, Laravel, REST APIs, MySQL
+- **Frontend:** TypeScript, React, Next.js, Tailwind CSS
+- **Delivery:** Git, Docker, Vercel, Supabase
+- **Integrations:** Google OAuth, Google Classroom, Gemini, Telegram, Excel, PDF
 
-### Tech Stack
+## Selected Work
 
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Laravel](https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+### [Attendance Recap System - DPMPTSP Kota Kediri](https://github.com/shuriza/rekap_absensi)
 
----
+An operational attendance system built with Laravel 12 and MySQL. It supports Excel import and preview, employee and leave management, monthly and annual reports, department analytics, and Excel/PDF export.
 
-### GitHub Stats
+`Laravel 12` `MySQL` `Laravel Excel` `Chart.js` `Tailwind CSS`
 
-<div align="center">
-  <img height="170" src="https://github-readme-stats.vercel.app/api?username=shuriza&show_icons=true&theme=tokyonight&hide_border=true&bg_color=0a0a0f&title_color=22d3ee&icon_color=22d3ee&text_color=e2e8f0" alt="GitHub Stats" />
-  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=shuriza&layout=compact&theme=tokyonight&hide_border=true&bg_color=0a0a0f&title_color=22d3ee&text_color=e2e8f0" alt="Top Languages" />
-</div>
+### [Todo AI](https://github.com/shuriza/todos)
 
----
+An integrated task-management application with Google Classroom sync, Gemini assistant, Telegram bot, automated reminders, Eisenhower prioritization, analytics, and PDF reporting.
 
-### Links
+[Live application](https://todosxai.ninja/)
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-0a0a0f?style=for-the-badge&logo=vercel&logoColor=22d3ee)](https://portofolio-gilt-zeta-13.vercel.app)
-[![Shuriza Store](https://img.shields.io/badge/Shuriza_Store-0a0a0f?style=for-the-badge&logo=shopify&logoColor=22d3ee)](https://shurizastore.my.id/)
-[![GitHub](https://img.shields.io/badge/GitHub-0a0a0f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/shuriza)
+`Laravel 12` `MySQL` `Google OAuth` `Gemini API` `Telegram Bot`
+
+### [Personal Portfolio and Admin CMS](https://github.com/shuriza/shuriza.github.io)
+
+A responsive portfolio with a protected admin area for managing projects, skills, and profile content. It uses Supabase Auth, PostgreSQL, and Row Level Security for server-side access control.
+
+[Live portfolio](https://portofolio-gilt-zeta-13.vercel.app)
+
+`Next.js 16` `TypeScript` `Supabase` `PostgreSQL` `Tailwind CSS`
+
+## Currently
+
+- Open to **Junior Backend Developer**, **Junior Fullstack Developer**, and **Web Developer** opportunities.
+- Strengthening automated testing, API design, and production deployment.
+- Available for on-site, hybrid, or remote opportunities.
+
+## Contact
+
+- Email: [firdausmfirdaus657@gmail.com](mailto:firdausmfirdaus657@gmail.com)
+- GitHub: [github.com/shuriza](https://github.com/shuriza)
+- Portfolio: [portofolio-gilt-zeta-13.vercel.app](https://portofolio-gilt-zeta-13.vercel.app)
