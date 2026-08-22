@@ -2,7 +2,7 @@
 
 **Junior Fullstack Web Developer | Laravel, Next.js, and MySQL**
 
-I am a D3 Manajemen Informatika graduate from Kediri, East Java. I have completed my academic requirements and am awaiting my graduation ceremony in September 2026. I build web applications that simplify operational workflows, from attendance reporting to task automation and content management.
+I am a web developer from Kediri, East Java. I build applications that simplify operational workflows, from attendance reporting to task automation and content management.
 
 [Portfolio](https://portofolio-gilt-zeta-13.vercel.app) | [CV](https://portofolio-gilt-zeta-13.vercel.app/cv) | [Email](mailto:firdausmfirdaus657@gmail.com)
 
