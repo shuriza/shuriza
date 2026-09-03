@@ -16,9 +16,3 @@ I am a web developer from Kediri, East Java. I build applications that simplify 
 - Open to **Junior Backend Developer**, **Junior Fullstack Developer**, and **Web Developer** opportunities.
 - Strengthening automated testing, API design, and production deployment.
 - Available for on-site, hybrid, or remote opportunities.
-
-## Contact
-
-- Email: [firdausmfirdaus657@gmail.com](mailto:firdausmfirdaus657@gmail.com)
-- GitHub: [github.com/shuriza](https://github.com/shuriza)
-- Portfolio: [shuriza.tech](https://shuriza.tech)
