@@ -42,13 +42,18 @@ class DeviceIdentity
         }
 
         $generated = (string) Str::ulid();
+        $now = now();
 
-        SyncState::query()->updateOrCreate(
-            ['key' => self::KEY],
-            ['value' => $generated],
-        );
+        SyncState::query()->insertOrIgnore([
+            'key' => self::KEY,
+            'value' => $generated,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
-        return $this->cached = $generated;
+        return $this->cached = (string) SyncState::query()
+            ->findOrFail(self::KEY)
+            ->value;
     }
 
     public function name(): string

@@ -3,6 +3,7 @@
 use App\Models\Counter;
 use App\Models\Service;
 use App\Services\QueueService;
+use App\Support\DeviceIdentity;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Carbon;
 
@@ -51,6 +52,18 @@ try {
     }
 
     $action = $argv[1] ?? '';
+
+    if ($action === 'identity') {
+        config(['antrian.device_id' => null]);
+
+        echo json_encode([
+            'ok' => true,
+            'device_id' => $app->make(DeviceIdentity::class)->id(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        return;
+    }
+
     $queue = $app->make(QueueService::class);
 
     if ($action === 'issue') {

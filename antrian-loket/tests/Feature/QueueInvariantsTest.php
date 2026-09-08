@@ -143,6 +143,23 @@ class QueueInvariantsTest extends TestCase
         );
     }
 
+    public function test_concurrent_workers_share_one_generated_device_identity(): void
+    {
+        $results = $this->runConcurrentWorkers(
+            action: 'identity',
+            arguments: [],
+            barrierDirectory: $this->createBarrierDirectory(),
+        );
+
+        $this->assertTrue($results[0]['ok'], json_encode($results[0], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $this->assertTrue($results[1]['ok'], json_encode($results[1], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $this->assertSame($results[0]['device_id'], $results[1]['device_id']);
+        $this->assertSame(
+            $results[0]['device_id'],
+            DB::table('sync_state')->where('key', 'device_id')->value('value'),
+        );
+    }
+
     public function test_concurrent_call_requests_never_leave_two_open_tickets_on_one_counter(): void
     {
         $service = Service::factory()->code('D')->create();
@@ -220,7 +237,7 @@ class QueueInvariantsTest extends TestCase
     }
 
     /**
-     * @return array<int, array{ok: bool, label?: string, number?: int, error?: string, error_class?: string}>
+     * @return array<int, array{ok: bool, label?: string, number?: int, device_id?: string, error?: string, error_class?: string}>
      */
     private function runConcurrentWorkers(string $action, array $arguments, string $barrierDirectory): array
     {
@@ -257,7 +274,7 @@ class QueueInvariantsTest extends TestCase
     }
 
     /**
-     * @return array{ok: bool, label?: string, number?: int, error?: string, error_class?: string}
+     * @return array{ok: bool, label?: string, number?: int, device_id?: string, error?: string, error_class?: string}
      */
     private function decodeWorkerResult(Process $process): array
     {
@@ -268,7 +285,7 @@ class QueueInvariantsTest extends TestCase
         $output = trim($process->getOutput());
         $this->assertNotSame('', $output, 'Queue worker produced no JSON output.');
 
-        /** @var array{ok: bool, label?: string, number?: int, error?: string, error_class?: string} $decoded */
+        /** @var array{ok: bool, label?: string, number?: int, device_id?: string, error?: string, error_class?: string} $decoded */
         $decoded = json_decode($output, true, 512, JSON_THROW_ON_ERROR);
 
         return $decoded;
