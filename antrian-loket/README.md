@@ -80,6 +80,19 @@ php artisan native:seed --no-interaction
 
 Jangan menyamakan hasil query database browser dengan isi jendela desktop. Pada paket produksi, NativePHP menggunakan direktori data aplikasi milik pengguna. Cadangkan database beserta WAL dengan mekanisme backup SQLite saat aplikasi beroperasi, atau tutup aplikasi sebelum menyalin berkasnya.
 
+Pada peluncuran pertama paket desktop, aplikasi membuat empat layanan dan empat loket bawaan jika tabel layanan dan loket sama-sama kosong. Inisialisasi ini tidak membuat tiket demo dan tidak mengubah kantor yang sudah dikonfigurasi.
+
+### Build Windows x64
+
+```sh
+composer native:prepare
+php artisan native:build win x64 --no-interaction
+```
+
+Installer dihasilkan sebagai `nativephp/electron/dist/Antrian Loket-1.0.0-setup.exe`. Electron Builder memerlukan hak membuat symbolic link ketika menyiapkan `winCodeSign`; aktifkan Windows Developer Mode atau jalankan terminal dengan hak Administrator jika ekstraksi cache gagal.
+
+Build saat ini masih menampilkan peringatan `INSECURE BUILD` karena secure app bundle NativePHP belum dikonfigurasi. Artefak sesuai untuk pembuktian lokal, belum untuk distribusi publik.
+
 ## Konfigurasi kantor dan printer
 
 Isi `.env`:
@@ -115,4 +128,4 @@ Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operas
 
 Setiap database dapat menerbitkan nomor sendiri saat offline. Dua database yang menerbitkan nomor sama untuk layanan/tanggal sama belum memiliki kebijakan alokasi nomor global. Jangan menganggap beberapa instalasi independen sudah menjadi satu antrean bersama. Resolusi revisi tiket yang sama berbeda dari benturan nomor dua UUID berbeda.
 
-Dokumen dalam `docs/` adalah ide/rencana, bukan daftar fitur yang seluruhnya tersedia. Binary distribusi, video demo, printer fisik, dan server pusat harus diverifikasi terpisah sebelum proyek disebut siap rilis.
+Dokumen dalam `docs/` adalah ide/rencana, bukan daftar fitur yang seluruhnya tersedia. Binary Windows x64 sudah berhasil dibangun dan alur ambil–panggil–selesai sudah diuji pada paket lokal. Secure app bundle, video demo, printer fisik, dan server pusat tetap harus diverifikasi sebelum proyek disebut siap rilis.

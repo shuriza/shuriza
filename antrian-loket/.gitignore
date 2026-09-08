@@ -29,6 +29,7 @@ Thumbs.db
 # NativePHP build output dan runtime Electron
 /build
 /dist
+/nativephp
 /temp
 /vendor/nativephp/php-bin
 *.sqlite

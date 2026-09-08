@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\OfficeInitializer;
 use Native\Desktop\Contracts\ProvidesPhpIni;
 use Native\Desktop\Facades\Window;
 
@@ -13,6 +14,8 @@ class NativeAppServiceProvider implements ProvidesPhpIni
      */
     public function boot(): void
     {
+        app(OfficeInitializer::class)->initialize();
+
         Window::open()
             ->title('Antrian Loket — '.config('antrian.office.name', 'Kantor Pelayanan Publik'))
             ->width(1280)
