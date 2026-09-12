@@ -69,7 +69,7 @@ Urutan berikut adalah rencana, bukan fitur yang sudah selesai atau otomatis diim
 |Prioritas|Pekerjaan|Acceptance dan prasyarat|
 |---|---|---|
 |P0|Kontrak server pusat dan alokasi nomor multi-perangkat|Sepakati identitas layanan/loket, ACK/cursor, otorisasi perangkat, serta kebijakan nomor unik lintas instalasi; jalankan integrasi dua database offline lalu online dengan server nyata. Server belum disertakan proyek ini.|
-|P0|Secure desktop bundle dan distribusi|Konfigurasikan mekanisme bundle sesuai NativePHP terpasang, build installer, uji install/upgrade dengan database pengguna tetap utuh; catat konfigurasi signing dan hilangnya peringatan insecure build sebelum klaim siap publik.|
+|P0|Secure desktop bundle dan distribusi|Gate `composer native:release` sudah fail-closed. NativePHP Desktop 2.3 memerlukan bundle Bifrost berbayar, bertentangan dengan kebijakan dependensi gratis saat ini; tim harus menyetujui layanan tersebut dan menyediakan Azure Trusted Signing atau sertifikat Windows sebelum installer secure dapat dibangun. Setelah tersedia, uji install/upgrade dengan database pengguna tetap utuh dan pastikan tidak ada peringatan insecure build.|
 |P1|Uji printer fisik 58 mm|Uji printer default, nama printer eksplisit, offline/hilang, lebar struk, dan hasil kertas; memerlukan perangkat/driver sasaran.|
 |P1|Backup/restore dan kapasitas outbox|Sepakati retensi audit/outbox dan operasi backup SQLite yang aman terhadap WAL; uji restore pada salinan database, bukan database operasional.|
 |P1|Bukti penerimaan operator|Rekam demo installer lokal: ambil, panggil, lewati, selesai, cetak, restart, serta operasi tanpa jaringan; operator memverifikasi pesan kegagalan dan pemulihan.|

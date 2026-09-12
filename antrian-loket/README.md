@@ -84,6 +84,8 @@ Pada peluncuran pertama paket desktop, aplikasi membuat empat layanan dan empat 
 
 ### Build Windows x64
 
+Build berikut hanya untuk pengembangan/internal dan dapat memuat source aplikasi terbuka:
+
 ```sh
 composer native:prepare
 php artisan native:build win x64 --no-interaction
@@ -91,7 +93,16 @@ php artisan native:build win x64 --no-interaction
 
 Installer dihasilkan sebagai `nativephp/electron/dist/Antrian Loket-1.0.0-setup.exe`. Electron Builder memerlukan hak membuat symbolic link ketika menyiapkan `winCodeSign`; aktifkan Windows Developer Mode atau jalankan terminal dengan hak Administrator jika ekstraksi cache gagal.
 
-Build saat ini masih menampilkan peringatan `INSECURE BUILD` karena secure app bundle NativePHP belum dikonfigurasi. Artefak sesuai untuk pembuktian lokal, belum untuk distribusi publik.
+Build saat ini masih menampilkan peringatan `INSECURE BUILD`. NativePHP Desktop 2.3 hanya mengambil secure app bundle dari artefak Bifrost `build/__nativephp_app_bundle`; Bifrost adalah layanan berbayar dan tidak termasuk kebijakan dependensi gratis proyek ini. Artefak source-terbuka sesuai untuk pembuktian lokal, bukan distribusi publik.
+
+Jalur rilis publik bersifat fail-closed:
+
+```sh
+composer native:release:check
+composer native:release
+```
+
+Perintah tersebut menolak build sebelum proses packaging jika secure bundle, mode production, identitas/versi aplikasi, atau code signing Windows belum lengkap. Pilih Azure Trusted Signing atau sertifikat yang dikenali Electron Builder melalui `CSC_LINK` dan `CSC_KEY_PASSWORD`; simpan kredensial hanya di environment lokal/secret store. Kebijakan gratis saat ini berarti jalur ini sengaja belum dapat menghasilkan installer secure sampai tim menyetujui layanan bundle dan menyediakan kredensial signing.
 
 ## Konfigurasi kantor dan printer
 

@@ -18,6 +18,11 @@ return [
     'app_id' => env('NATIVEPHP_APP_ID', 'com.nativephp.app'),
 
     /**
+     * Bifrost-generated bundle consumed by NativePHP's secure build path.
+     */
+    'release_bundle_path' => base_path('build/__nativephp_app_bundle'),
+
+    /**
      * If your application allows deep linking, you can specify the scheme
      * to use here. This is the scheme that will be used to open your
      * application from within other applications.
@@ -77,6 +82,33 @@ return [
         'NATIVEPHP_AZURE_ENDPOINT',
         'NATIVEPHP_AZURE_CERTIFICATE_PROFILE_NAME',
         'NATIVEPHP_AZURE_CODE_SIGNING_ACCOUNT_NAME',
+        'CSC_LINK',
+        'CSC_KEY_PASSWORD',
+    ],
+
+    /**
+     * Release credentials are checked before distributable builds. Values
+     * remain environment-owned and are stripped from the packaged app.
+     */
+    'release_signing' => [
+        'azure' => [
+            'tenant_id' => env('AZURE_TENANT_ID'),
+            'client_id' => env('AZURE_CLIENT_ID'),
+            'client_secret' => env('AZURE_CLIENT_SECRET'),
+            'publisher_name' => env('NATIVEPHP_AZURE_PUBLISHER_NAME'),
+            'endpoint' => env('NATIVEPHP_AZURE_ENDPOINT'),
+            'certificate_profile_name' => env('NATIVEPHP_AZURE_CERTIFICATE_PROFILE_NAME'),
+            'code_signing_account_name' => env('NATIVEPHP_AZURE_CODE_SIGNING_ACCOUNT_NAME'),
+        ],
+        'certificate' => [
+            'link' => env('CSC_LINK'),
+            'password' => env('CSC_KEY_PASSWORD'),
+        ],
+        'apple' => [
+            'id' => env('NATIVEPHP_APPLE_ID'),
+            'password' => env('NATIVEPHP_APPLE_ID_PASS'),
+            'team_id' => env('NATIVEPHP_APPLE_TEAM_ID'),
+        ],
     ],
 
     /**

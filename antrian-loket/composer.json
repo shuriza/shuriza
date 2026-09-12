@@ -42,6 +42,13 @@
             "npm ci --prefix vendor/nativephp/desktop/resources/electron",
             "@php scripts/fix-nativephp-plugin.php"
         ],
+        "native:release:check": "@php artisan antrian:release-check --target=win --no-interaction",
+        "native:release": [
+            "Composer\\Config::disableProcessTimeout",
+            "@native:release:check",
+            "@native:prepare",
+            "@php artisan native:build win x64 --no-interaction"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
