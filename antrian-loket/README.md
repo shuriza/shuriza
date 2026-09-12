@@ -1,6 +1,21 @@
 # Antrian Loket
 
+[![Antrian Loket CI](https://github.com/shuriza/shuriza/actions/workflows/antrian-loket.yml/badge.svg?branch=feat%2Fui-refactor)](https://github.com/shuriza/shuriza/actions/workflows/antrian-loket.yml)
+
 Aplikasi desktop lokal untuk petugas loket pelayanan publik. Dibangun dengan Laravel 13, NativePHP Desktop 2, SQLite, Blade, Tailwind CSS 4, dan JavaScript tanpa framework frontend. Antarmuka berbahasa Indonesia.
+
+## Status pengembangan
+
+| Area | Status | Batas |
+|---|---|---|
+| Operasi loket offline | Siap diuji operator | Ambil, panggil, lewati, selesai, dan audit/outbox berjalan lokal |
+| Printer NativePHP | Terimplementasi | Validasi akhir memerlukan printer fisik 58 mm dan driver sasaran |
+| Sinkronisasi | Klien dan resolusi konflik tersedia | Server pusat dan alokasi nomor lintas perangkat belum tersedia |
+| Backup dan kesehatan outbox | Tersedia | Restore tetap manual dan dilakukan ketika aplikasi ditutup |
+| Installer internal Windows x64 | Pernah berhasil dibangun | Source aplikasi masih terekspos pada build tanpa secure bundle |
+| Distribusi publik | Diblokir release gate | Memerlukan secure bundle Bifrost dan code signing Windows |
+
+Quality gate aktif menjalankan Pint, migrasi database baru, PHPUnit, dan build Vite. Klaim kesiapan rilis harus tetap mengikuti batas di atas, bukan hanya status CI hijau.
 
 ## Masalah apa yang diselesaikan?
 
@@ -18,6 +33,8 @@ Petugas loket pelayanan publik, dengan contoh layanan perizinan, legalisasi, dan
 - Identitas perangkat persisten, audit peristiwa tiket, dan outbox untuk perubahan yang belum dikirim.
 - Klien sinkronisasi push/pull dan resolusi konflik. **Server pusat tidak disertakan.** Mengisi endpoint saja tidak menyediakan server atau menjamin sinkronisasi berhasil.
 - Indikator membedakan mode lokal, jaringan tersedia, dan jaringan terputus. Status jaringan bukan pemeriksaan kesehatan pusat. Jumlah outbox diperbarui ketika halaman dimuat ulang.
+- Snapshot SQLite konsisten melalui Online Backup API dan health gate untuk backlog outbox.
+- Release gate yang menolak distribusi publik tanpa secure bundle, production config, identitas/versi aplikasi, dan code signing.
 
 ## Kenapa native, bukan web biasa?
 
@@ -133,7 +150,7 @@ npm ci --ignore-scripts
 npm run build
 ```
 
-Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
+Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **41 tes dan 153 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
 
 Konvensi tim tersedia di `.ai/rules/index.md`. Alur review, invariant yang wajib dijaga, konflik gaya yang ditunda, dan acceptance rilis berikutnya dijelaskan dalam [panduan kualitas dan roadmap](docs/quality-roadmap.md).
 
