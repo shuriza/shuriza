@@ -1,13 +1,22 @@
-name: CI
+name: Antrian Loket CI
 
 on:
   push:
-    branches: [main]
+    paths:
+      - 'antrian-loket/**'
+      - '.github/workflows/antrian-loket.yml'
   pull_request:
-    branches: [main]
+    paths:
+      - 'antrian-loket/**'
+      - '.github/workflows/antrian-loket.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: antrian-loket
 
 jobs:
   test:
@@ -30,13 +39,14 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+          cache-dependency-path: antrian-loket/package-lock.json
 
       - name: Cache Composer packages
         uses: actions/cache@v4
         with:
           path: ~/.cache/composer/files
-          key: composer-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-
+          key: antrian-loket-composer-${{ hashFiles('antrian-loket/composer.lock') }}
+          restore-keys: antrian-loket-composer-
 
       # NativePHP's post-update-cmd runs native:install, which downloads the
       # Electron toolchain. CI only needs to lint, test, and build assets, so

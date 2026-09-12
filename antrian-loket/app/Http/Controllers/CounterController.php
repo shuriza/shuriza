@@ -28,11 +28,23 @@ class CounterController extends Controller
             ->orderBy('name')
             ->get();
 
-        $rows = $counters->map(fn (Counter $counter): array => [
-            'counter' => $counter,
-            'waitingCount' => $this->queue->waitingCount($counter->service),
-            'estimatedWaitMinutes' => $this->queue->estimatedWaitMinutes($counter->service),
-        ]);
+        $waitingCounts = Ticket::query()
+            ->waiting()
+            ->forDate(now())
+            ->whereIn('service_id', $counters->pluck('service_id'))
+            ->selectRaw('service_id, count(*) as waiting_count')
+            ->groupBy('service_id')
+            ->pluck('waiting_count', 'service_id');
+
+        $rows = $counters->map(function (Counter $counter) use ($waitingCounts): array {
+            $waitingCount = (int) $waitingCounts->get($counter->service_id, 0);
+
+            return [
+                'counter' => $counter,
+                'waitingCount' => $waitingCount,
+                'estimatedWaitMinutes' => $waitingCount * (int) $counter->service->estimated_minutes,
+            ];
+        });
 
         return view('loket.index', [
             'rows' => $rows,
@@ -47,21 +59,24 @@ class CounterController extends Controller
     public function show(Counter $counter): View
     {
         $counter->load('service');
+        $serviceDate = now();
 
         $waiting = Ticket::query()
             ->waiting()
-            ->forDate(now())
+            ->forDate($serviceDate)
             ->where('service_id', $counter->service_id)
             ->orderBy('number')
             ->limit(8)
             ->get();
 
+        $waitingCount = $this->queue->waitingCount($counter->service, $serviceDate);
+
         return view('loket.show', [
             'counter' => $counter,
             'currentTicket' => $counter->currentTicket(),
             'waitingTickets' => $waiting,
-            'waitingCount' => $this->queue->waitingCount($counter->service),
-            'estimatedWaitMinutes' => $this->queue->estimatedWaitMinutes($counter->service),
+            'waitingCount' => $waitingCount,
+            'estimatedWaitMinutes' => $waitingCount * (int) $counter->service->estimated_minutes,
             'pendingCount' => OutboxEntry::pending()->count(),
             'syncConfigured' => filled(config('antrian.sync.endpoint')),
         ]);

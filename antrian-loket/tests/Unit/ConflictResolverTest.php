@@ -23,6 +23,36 @@ class ConflictResolverTest extends TestCase
         $this->assertSame('local', $outcome->winner);
     }
 
+    public function test_remote_payload_rejects_positive_integer_strings_beyond_php_int_max(): void
+    {
+        $resolver = new ConflictResolver;
+
+        $invalidRevision = $resolver->resolve(null, $this->remotePayload([
+            'revision' => PHP_INT_MAX.'0',
+        ]));
+        $invalidNumber = $resolver->resolve(null, $this->remotePayload([
+            'number' => PHP_INT_MAX.'0',
+        ]));
+
+        $this->assertFalse($invalidRevision->shouldApplyRemote);
+        $this->assertSame('local', $invalidRevision->winner);
+        $this->assertFalse($invalidNumber->shouldApplyRemote);
+        $this->assertSame('local', $invalidNumber->winner);
+    }
+
+    public function test_remote_payload_accepts_php_int_max_integer_strings_for_revision_and_number(): void
+    {
+        $resolver = new ConflictResolver;
+
+        $outcome = $resolver->resolve(null, $this->remotePayload([
+            'number' => (string) PHP_INT_MAX,
+            'revision' => (string) PHP_INT_MAX,
+        ]));
+
+        $this->assertTrue($outcome->shouldApplyRemote);
+        $this->assertSame('remote', $outcome->winner);
+    }
+
     public function test_numeric_device_ids_are_compared_as_numbers(): void
     {
         $resolver = new ConflictResolver;

@@ -314,17 +314,7 @@ class ConflictResolver
 
     private function parseRevision(mixed $revision): ?int
     {
-        if (is_int($revision)) {
-            return $revision >= 1 ? $revision : null;
-        }
-
-        if (is_string($revision) && preg_match('/^\d+$/', $revision) === 1) {
-            $value = (int) $revision;
-
-            return $value >= 1 ? $value : null;
-        }
-
-        return null;
+        return $this->parsePositiveInt($revision);
     }
 
     private function parsePositiveInt(mixed $value): ?int
@@ -334,9 +324,18 @@ class ConflictResolver
         }
 
         if (is_string($value) && preg_match('/^\d+$/', $value) === 1) {
-            $parsed = (int) $value;
+            $normalized = ltrim($value, '0') ?: '0';
+            $maximum = (string) PHP_INT_MAX;
 
-            return $parsed >= 1 ? $parsed : null;
+            if (
+                $normalized !== '0'
+                && (
+                    strlen($normalized) < strlen($maximum)
+                    || (strlen($normalized) === strlen($maximum) && strcmp($normalized, $maximum) <= 0)
+                )
+            ) {
+                return (int) $normalized;
+            }
         }
 
         return null;

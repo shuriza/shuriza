@@ -160,6 +160,60 @@ class SyncServiceTest extends TestCase
         $this->assertSame(0, TicketEvent::query()->count());
     }
 
+    public function test_pull_rejects_out_of_range_integer_strings_without_advancing_cursor_or_writing_batch(): void
+    {
+        $this->configureSync();
+        Service::factory()->code('A')->create();
+        SyncState::query()->updateOrCreate(['key' => 'last_pull_cursor'], ['value' => 'cursor-awal']);
+
+        Http::fake([
+            '*' => Http::response([
+                'events' => [
+                    $this->remoteEvent(),
+                    $this->remoteEvent([
+                        'number' => 2,
+                        'revision' => PHP_INT_MAX.'0',
+                    ]),
+                ],
+                'cursor' => 'cursor-baru',
+            ], 200),
+        ]);
+
+        $report = app(SyncService::class)->pull();
+
+        $this->assertNotNull($report->error);
+        $this->assertSame('cursor-awal', SyncState::query()->find('last_pull_cursor')?->value);
+        $this->assertSame(0, Ticket::query()->count());
+        $this->assertSame(0, TicketEvent::query()->count());
+    }
+
+    public function test_pull_accepts_php_int_max_integer_strings_for_revision_and_number(): void
+    {
+        $this->configureSync();
+        Service::factory()->code('A')->create();
+
+        Http::fake([
+            '*' => Http::response([
+                'events' => [
+                    $this->remoteEvent([
+                        'number' => (string) PHP_INT_MAX,
+                        'revision' => (string) PHP_INT_MAX,
+                    ]),
+                ],
+                'cursor' => 'cursor-maksimum',
+            ], 200),
+        ]);
+
+        $report = app(SyncService::class)->pull();
+        $ticket = Ticket::query()->sole();
+
+        $this->assertNull($report->error);
+        $this->assertSame(1, $report->sent);
+        $this->assertSame(PHP_INT_MAX, $ticket->number);
+        $this->assertSame(PHP_INT_MAX, $ticket->revision);
+        $this->assertSame('cursor-maksimum', SyncState::query()->find('last_pull_cursor')?->value);
+    }
+
     public function test_push_requires_explicit_ack_contract_and_keeps_pending_entries(): void
     {
         $this->configureSync();

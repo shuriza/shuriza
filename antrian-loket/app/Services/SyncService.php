@@ -382,9 +382,17 @@ class SyncService
                 return $value;
             }
         } elseif (is_string($value) && preg_match('/^\d+$/', $value) === 1) {
-            $parsed = (int) $value;
-            if ($parsed >= 1) {
-                return $parsed;
+            $normalized = ltrim($value, '0') ?: '0';
+            $maximum = (string) PHP_INT_MAX;
+
+            if (
+                $normalized !== '0'
+                && (
+                    strlen($normalized) < strlen($maximum)
+                    || (strlen($normalized) === strlen($maximum) && strcmp($normalized, $maximum) <= 0)
+                )
+            ) {
+                return (int) $normalized;
             }
         }
 

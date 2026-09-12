@@ -122,7 +122,9 @@ npm ci --ignore-scripts
 npm run build
 ```
 
-Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Workflow `.github/workflows/ci.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
+Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
+
+Konvensi tim tersedia di `.ai/rules/index.md`. Alur review, invariant yang wajib dijaga, konflik gaya yang ditunda, dan acceptance rilis berikutnya dijelaskan dalam [panduan kualitas dan roadmap](docs/quality-roadmap.md).
 
 ## Batas penggunaan multi-perangkat dan rilis
 

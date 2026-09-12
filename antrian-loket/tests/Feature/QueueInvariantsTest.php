@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\TicketEventType;
 use App\Enums\TicketStatus;
 use App\Exceptions\QueueConflictException;
 use App\Models\Counter;
+use App\Models\OutboxEntry;
 use App\Models\Service;
 use App\Models\Ticket;
+use App\Models\TicketEvent;
 use App\Services\QueueService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Artisan;
@@ -234,6 +237,37 @@ class QueueInvariantsTest extends TestCase
             fn () => $queue->skip($skippedTicket, $reassignedCounter),
             'bukan milik loket',
         );
+    }
+
+    public function test_local_queue_mutations_write_matching_audit_and_outbox_records(): void
+    {
+        $queue = $this->queue();
+        $service = Service::factory()->code('A')->create();
+        $counter = Counter::factory()->for($service)->create([
+            'is_open' => true,
+        ]);
+
+        $finishedTicket = $queue->issue($service);
+        $queue->finish($queue->callNext($counter), $counter);
+
+        $skippedTicket = $queue->issue($service);
+        $queue->skip($queue->callNext($counter), $counter);
+
+        $this->assertSame(TicketStatus::Selesai, $finishedTicket->fresh()->status);
+        $this->assertSame(3, $finishedTicket->fresh()->revision);
+        $this->assertSame(TicketStatus::Dilewati, $skippedTicket->fresh()->status);
+        $this->assertSame(3, $skippedTicket->fresh()->revision);
+
+        $events = TicketEvent::query()->orderBy('id')->get();
+        $this->assertSame(
+            ['issued', 'called', 'finished', 'issued', 'called', 'skipped'],
+            $events->pluck('type')->map(fn (TicketEventType $type): string => $type->value)->all(),
+        );
+        $this->assertSame([1, 2, 3, 1, 2, 3], $events->pluck('revision')->all());
+
+        $eventUuids = $events->pluck('uuid')->sort()->values()->all();
+        $outboxUuids = OutboxEntry::query()->pluck('event_uuid')->sort()->values()->all();
+        $this->assertSame($eventUuids, $outboxUuids);
     }
 
     /**
