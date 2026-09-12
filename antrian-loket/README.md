@@ -137,6 +137,25 @@ Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operas
 
 Konvensi tim tersedia di `.ai/rules/index.md`. Alur review, invariant yang wajib dijaga, konflik gaya yang ditunda, dan acceptance rilis berikutnya dijelaskan dalam [panduan kualitas dan roadmap](docs/quality-roadmap.md).
 
+## Operasional backup dan outbox
+
+Buat snapshot konsisten dari database SQLite yang sedang aktif:
+
+```sh
+php artisan antrian:backup
+php artisan antrian:backup --path="D:\\Backup\\antrian.sqlite"
+```
+
+Command memakai SQLite Online Backup API, sehingga data WAL yang sudah commit ikut masuk snapshot. File tujuan yang sudah ada tidak ditimpa kecuali `--force`. Setiap hasil melewati `PRAGMA integrity_check` sebelum file sementara dipindahkan menjadi backup final.
+
+Periksa backlog sinkronisasi:
+
+```sh
+php artisan antrian:outbox-health
+```
+
+Exit code gagal berarti jumlah pending, umur event tertua, atau percobaan maksimum telah mencapai ambang `ANTRIAN_OUTBOX_*_WARNING`. Jangan hapus pending outbox untuk menghilangkan alarm; pulihkan endpoint dan periksa `last_error`. Restore tetap operasi manual dan harus dilakukan ketika aplikasi ditutup: simpan database aktif, validasi backup dengan `PRAGMA integrity_check`, lalu ganti database sesuai lokasi runtime browser/NativePHP yang benar.
+
 ## Batas penggunaan multi-perangkat dan rilis
 
 Setiap database dapat menerbitkan nomor sendiri saat offline. Dua database yang menerbitkan nomor sama untuk layanan/tanggal sama belum memiliki kebijakan alokasi nomor global. Jangan menganggap beberapa instalasi independen sudah menjadi satu antrean bersama. Resolusi revisi tiket yang sama berbeda dari benturan nomor dua UUID berbeda.

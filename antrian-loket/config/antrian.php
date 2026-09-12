@@ -36,6 +36,13 @@ return [
         'batch_size' => (int) env('ANTRIAN_SYNC_BATCH_SIZE', 200),
     ],
 
+    'operations' => [
+        'backup_directory' => env('ANTRIAN_BACKUP_DIRECTORY') ?: storage_path('app/backups'),
+        'outbox_pending_warning' => (int) env('ANTRIAN_OUTBOX_PENDING_WARNING', 1000),
+        'outbox_oldest_hours_warning' => (int) env('ANTRIAN_OUTBOX_OLDEST_HOURS_WARNING', 24),
+        'outbox_attempts_warning' => (int) env('ANTRIAN_OUTBOX_ATTEMPTS_WARNING', 5),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Cetak tiket
