@@ -94,6 +94,23 @@ Verifikasi akhir: 84 tes lulus dengan 331 assertions; Pint bersih; `npm run buil
 
 Catatan alat: `assertSee`/regex ber-anchor tidak dapat dipercaya untuk memverifikasi surface ini. Dua kali alat verifikasinya sendiri yang salah — placeholder form meloloskan `assertSee`, dan `^` gagal karena teks badge punya whitespace di depan. Verifikasi UI harus memeriksa data terstruktur atau screenshot, bukan pencocokan teks mentah.
 
+## Verifikasi paket desktop 13 September 2026
+
+Installer sebelumnya bertanggal 9 September, empat hari sebelum fitur pemulihan antrean dan riwayat ada, jadi paket lama tidak membuktikan apa pun untuk fitur tersebut. Build ulang: `composer native:prepare` lalu `php artisan native:build win x64`, keduanya exit 0 (build ±8 menit, installer 122 MB).
+
+Diverifikasi di dalam paket, bukan `php artisan serve`:
+
+- Kode baru benar terbundel: rute `panggil-ulang`, `kembalikan`, `riwayat.index`, `riwayat.show`; `TicketHistoryController`; kedua view `riwayat`; `recall()`/`restore()` pada QueueService; case enum `Recalled`/`Restored`.
+- Peluncuran pertama membuat empat layanan dan empat loket bawaan, sesuai dokumentasi. PHP server internal di port 8100; data di `AppData\Roaming\antrian-loket`, terpisah dari `database/database.sqlite`.
+- Kelima rute halaman menjawab 200, termasuk `/riwayat`.
+- Alur operator penuh lewat POST sungguhan: ambil, panggil, panggil ulang, lewati, kembalikan. Flash message benar dan nomor tiket dipertahankan.
+- Jejak audit memuat lima event berurutan: diambil, dipanggil, dipanggil ulang, dilewati, dikembalikan. Kartu durasi menampilkan angka, bukan `—`, sehingga perbaikan durasi terbukti pada paket.
+- Restart penuh aplikasi: kelima event dan status hasil `restore()` tetap utuh.
+
+Peringatan `INSECURE BUILD` tetap muncul karena secure bundle Bifrost tidak tersedia; ini sesuai kebijakan dependensi gratis dan bukan regresi. Artefak build tidak masuk repo (`/nativephp` sudah di `.gitignore`).
+
+Belum diverifikasi: install/upgrade lewat installer NSIS dengan database pengguna yang sudah terisi, dan pencetakan ke printer fisik 58 mm.
+
 ## Keputusan gaya yang tetap ditunda
 
 |Area|Status|Syarat sebelum menjadi aturan baru|
@@ -118,7 +135,7 @@ Urutan berikut adalah rencana, bukan fitur yang sudah selesai atau otomatis diim
 |P1|Backup/restore dan kapasitas outbox|Selesai untuk aplikasi lokal: snapshot WAL-safe, validasi backup, restore dengan backup pra-restore, health gate, retention preview/execute, dan halaman Operasional tersedia. Acceptance produksi tetap membutuhkan drill restore pada salinan database paket dengan aplikasi ditutup.|
 |P1|Konfigurasi kantor lokal|Selesai: layanan dan loket dapat ditambah/diperbarui dengan guard terhadap perubahan identitas sinkronisasi dan pekerjaan aktif. Penghapusan historis sengaja tidak disediakan.|
 |P1|Laporan operasional harian|Selesai untuk database lokal: status per layanan dan durasi rata-rata tersedia dengan filter tanggal. Agregasi lintas perangkat menunggu server pusat.|
-|P1|Bukti penerimaan operator|Rekam demo installer lokal: ambil, panggil, lewati, selesai, cetak, restart, serta operasi tanpa jaringan; operator memverifikasi pesan kegagalan dan pemulihan.|
+|P1|Bukti penerimaan operator|Sebagian terpenuhi: pada paket lokal sudah diuji ambil, panggil, panggil ulang, lewati, kembalikan, riwayat/jejak audit, dan ketahanan data melewati restart (lihat catatan verifikasi paket 13 September). Masih perlu: rekaman demo, pencetakan ke printer fisik, dan verifikasi pesan kegagalan/pemulihan oleh operator sungguhan.|
 |P2|Penyelesaian perbedaan gaya test|Gunakan hasil review kategori test di atas; perubahan hanya setelah ada manfaat isolasi, determinisme, atau pemeliharaan yang terukur.|
 
 Portal warga, layar TV, dan aplikasi mobile tetap di luar scope aplikasi desktop saat ini. Jangan mengklaim satu antrean multi-perangkat hanya karena resolusi revisi tiket yang sama sudah tersedia.
