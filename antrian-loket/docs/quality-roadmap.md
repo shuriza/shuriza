@@ -35,8 +35,9 @@ Pilih file test yang sesuai perubahan; contoh di atas untuk sinkronisasi. Test m
 - **Konvergensi:** revision dan identitas perangkat adalah bagian protokol. Jangan mengganti tie-break dengan jam komputer atau mengasumsikan ID perangkat numerik selalu muat dalam integer PHP.
 - **Transaksi sync:** pertahankan helper write transaction SQLite untuk `BEGIN IMMEDIATE`; transaksi queue/setup memakai Laravel transaction closure.
 - **Printer:** sukses API berarti permintaan terkirim, bukan bukti kertas keluar. Printer bernama yang hilang tidak boleh dialihkan diam-diam ke printer lain.
-- **Backup:** database aktif tidak disalin sebagai file mentah. Gunakan `antrian:backup`, yang membuat snapshot konsisten melalui SQLite Online Backup API dan memvalidasi integritas sebelum publish.
-- **Outbox:** backlog tidak dihapus untuk mengurangi ukuran. `antrian:outbox-health` memantau jumlah pending, umur tertua, dan jumlah percobaan; cleanup synced rows memerlukan kebijakan retensi terpisah.
+- **Backup:** database aktif tidak disalin sebagai file mentah. Gunakan `antrian:backup`, yang membuat snapshot konsisten melalui SQLite Online Backup API dan memvalidasi integritas serta skema minimum sebelum publish.
+- **Restore:** jalankan offline dengan `--confirm=RESTORE`. Sumber divalidasi lebih dulu, database aktif dibackup, hasil restore divalidasi lagi, dan kegagalan memulihkan backup pra-restore.
+- **Outbox:** backlog pending tidak dihapus untuk mengurangi ukuran. `antrian:outbox-health` memantau jumlah pending, umur tertua, dan jumlah percobaan; `antrian:outbox-prune` hanya menghapus entry tersinkron setelah retensi dan default-nya preview.
 
 ## Quality gate otomatis
 
@@ -73,7 +74,7 @@ Urutan berikut adalah rencana, bukan fitur yang sudah selesai atau otomatis diim
 |P0|Kontrak server pusat dan alokasi nomor multi-perangkat|Sepakati identitas layanan/loket, ACK/cursor, otorisasi perangkat, serta kebijakan nomor unik lintas instalasi; jalankan integrasi dua database offline lalu online dengan server nyata. Server belum disertakan proyek ini.|
 |P0|Secure desktop bundle dan distribusi|Gate `composer native:release` sudah fail-closed. NativePHP Desktop 2.3 memerlukan bundle Bifrost berbayar, bertentangan dengan kebijakan dependensi gratis saat ini; tim harus menyetujui layanan tersebut dan menyediakan Azure Trusted Signing atau sertifikat Windows sebelum installer secure dapat dibangun. Setelah tersedia, uji install/upgrade dengan database pengguna tetap utuh dan pastikan tidak ada peringatan insecure build.|
 |P1|Uji printer fisik 58 mm|Uji printer default, nama printer eksplisit, offline/hilang, lebar struk, dan hasil kertas; memerlukan perangkat/driver sasaran.|
-|P1|Backup/restore dan kapasitas outbox|Snapshot WAL-safe dan health gate outbox sudah tersedia. Berikutnya sepakati retensi audit/synced outbox dan lakukan drill restore pada salinan database dengan aplikasi ditutup; jangan menjalankan restore otomatis pada database operasional.|
+|P1|Backup/restore dan kapasitas outbox|Selesai untuk aplikasi lokal: snapshot WAL-safe, validasi backup, restore dengan backup pra-restore, health gate, retention preview/execute, dan halaman Operasional tersedia. Acceptance produksi tetap membutuhkan drill restore pada salinan database paket dengan aplikasi ditutup.|
 |P1|Bukti penerimaan operator|Rekam demo installer lokal: ambil, panggil, lewati, selesai, cetak, restart, serta operasi tanpa jaringan; operator memverifikasi pesan kegagalan dan pemulihan.|
 |P2|Penyelesaian perbedaan gaya test|Gunakan hasil review kategori test di atas; perubahan hanya setelah ada manfaat isolasi, determinisme, atau pemeliharaan yang terukur.|
 

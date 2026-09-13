@@ -34,6 +34,8 @@ Petugas loket pelayanan publik, dengan contoh layanan perizinan, legalisasi, dan
 - Klien sinkronisasi push/pull dan resolusi konflik. **Server pusat tidak disertakan.** Mengisi endpoint saja tidak menyediakan server atau menjamin sinkronisasi berhasil.
 - Indikator membedakan mode lokal, jaringan tersedia, dan jaringan terputus. Status jaringan bukan pemeriksaan kesehatan pusat. Jumlah outbox diperbarui ketika halaman dimuat ulang.
 - Snapshot SQLite konsisten melalui Online Backup API dan health gate untuk backlog outbox.
+- Halaman Operasional untuk melihat kesehatan outbox, kegagalan pending, menjalankan sinkronisasi manual, dan membuat backup lokal.
+- Validasi backup, restore offline dengan backup pra-restore, dan retensi aman untuk outbox yang sudah tersinkron.
 - Release gate yang menolak distribusi publik tanpa secure bundle, production config, identitas/versi aplikasi, dan code signing.
 
 ## Kenapa native, bukan web biasa?
@@ -150,7 +152,7 @@ npm ci --ignore-scripts
 npm run build
 ```
 
-Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **41 tes dan 153 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
+Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **52 tes dan 195 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
 
 Konvensi tim tersedia di `.ai/rules/index.md`. Alur review, invariant yang wajib dijaga, konflik gaya yang ditunda, dan acceptance rilis berikutnya dijelaskan dalam [panduan kualitas dan roadmap](docs/quality-roadmap.md).
 
@@ -171,7 +173,25 @@ Periksa backlog sinkronisasi:
 php artisan antrian:outbox-health
 ```
 
-Exit code gagal berarti jumlah pending, umur event tertua, atau percobaan maksimum telah mencapai ambang `ANTRIAN_OUTBOX_*_WARNING`. Jangan hapus pending outbox untuk menghilangkan alarm; pulihkan endpoint dan periksa `last_error`. Restore tetap operasi manual dan harus dilakukan ketika aplikasi ditutup: simpan database aktif, validasi backup dengan `PRAGMA integrity_check`, lalu ganti database sesuai lokasi runtime browser/NativePHP yang benar.
+Operator juga dapat membuka menu **Operasional** untuk melihat metrik tersebut, kegagalan terbaru, membuat backup, dan menjalankan push/pull manual ketika endpoint pusat sudah dikonfigurasi.
+
+Validasi dan restore backup dari terminal ketika aplikasi desktop dan server development sudah ditutup:
+
+```sh
+php artisan antrian:backup-validate "D:\\Backup\\antrian.sqlite"
+php artisan antrian:restore "D:\\Backup\\antrian.sqlite" --confirm=RESTORE
+```
+
+Restore menolak file rusak atau SQLite lain yang tidak memiliki skema minimum Antrian Loket. Sebelum mengganti database aktif, command selalu membuat backup pra-restore; bila restore atau validasi akhir gagal, database pra-restore dipulihkan kembali.
+
+Retensi outbox tersinkron bersifat preview secara default:
+
+```sh
+php artisan antrian:outbox-prune --days=30
+php artisan antrian:outbox-prune --days=30 --execute
+```
+
+Hanya entry dengan `synced_at` yang melewati retensi yang dapat dihapus. Pending outbox tidak pernah masuk prune. Exit code `antrian:outbox-health` gagal berarti jumlah pending, umur event tertua, atau percobaan maksimum telah mencapai ambang `ANTRIAN_OUTBOX_*_WARNING`; pulihkan endpoint dan periksa `last_error`, jangan hapus pending untuk menghilangkan alarm.
 
 ## Batas penggunaan multi-perangkat dan rilis
 

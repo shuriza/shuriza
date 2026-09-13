@@ -11,10 +11,15 @@
 <body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
     <header class="border-b border-slate-800 bg-slate-900">
         <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-            <a href="{{ route('loket.index') }}" class="flex items-baseline gap-3">
-                <span class="text-2xl font-bold tracking-tight text-emerald-400">Antrian Loket</span>
-                <span class="hidden text-sm text-slate-400 sm:inline">{{ config('antrian.office.name') }}</span>
-            </a>
+            <div class="flex items-center gap-6">
+                <a href="{{ route('loket.index') }}" class="flex items-baseline gap-3">
+                    <span class="text-2xl font-bold tracking-tight text-emerald-400">Antrian Loket</span>
+                    <span class="hidden text-sm text-slate-400 sm:inline">{{ config('antrian.office.name') }}</span>
+                </a>
+                <a href="{{ route('operasional.index') }}" class="hidden text-sm font-semibold text-slate-300 transition hover:text-emerald-300 sm:inline">
+                    Operasional
+                </a>
+            </div>
 
             {{-- Indikator konektivitas dan outbox; diperbarui oleh resources/js/app.js. --}}
             <div

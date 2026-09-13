@@ -25,6 +25,7 @@ class BackupDatabaseTest extends TestCase
 
         config([
             'database.default' => 'backup_test',
+            'antrian.operations.backup_directory' => $directory,
             'database.connections.backup_test' => [
                 'driver' => 'sqlite',
                 'database' => $this->sourcePath,
@@ -89,5 +90,60 @@ class BackupDatabaseTest extends TestCase
             ->assertFailed();
 
         $this->assertTrue(DB::connection()->getSchemaBuilder()->hasTable('sync_state'));
+    }
+
+    public function test_valid_backup_passes_schema_and_integrity_validation(): void
+    {
+        $this->artisan('antrian:backup', ['--path' => $this->backupPath])
+            ->assertSuccessful();
+
+        $this->artisan('antrian:backup-validate', ['path' => $this->backupPath])
+            ->expectsOutputToContain('Backup valid')
+            ->assertSuccessful();
+    }
+
+    public function test_unrelated_sqlite_database_is_rejected_as_a_backup(): void
+    {
+        $unrelatedPath = dirname($this->sourcePath).'/unrelated.sqlite';
+        $database = new SQLite3($unrelatedPath);
+        $database->exec('CREATE TABLE unrelated (id INTEGER PRIMARY KEY)');
+        $database->close();
+
+        $this->artisan('antrian:backup-validate', ['path' => $unrelatedPath])
+            ->expectsOutputToContain('Tabel wajib hilang')
+            ->assertFailed();
+    }
+
+    public function test_restore_requires_confirmation_without_changing_the_database(): void
+    {
+        DB::connection()->table('sync_state')->insert(['key' => 'proof', 'value' => 'current']);
+        $this->artisan('antrian:backup', ['--path' => $this->backupPath])->assertSuccessful();
+        DB::connection()->table('sync_state')->where('key', 'proof')->update(['value' => 'changed']);
+
+        $this->artisan('antrian:restore', ['path' => $this->backupPath])
+            ->expectsOutputToContain('--confirm=RESTORE')
+            ->assertFailed();
+
+        $this->assertSame('changed', DB::connection()->table('sync_state')->where('key', 'proof')->value('value'));
+    }
+
+    public function test_restore_replaces_database_and_keeps_a_pre_restore_backup(): void
+    {
+        DB::connection()->table('sync_state')->insert(['key' => 'proof', 'value' => 'backup-value']);
+        $this->artisan('antrian:backup', ['--path' => $this->backupPath])->assertSuccessful();
+        DB::connection()->table('sync_state')->where('key', 'proof')->update(['value' => 'current-value']);
+
+        $this->artisan('antrian:restore', [
+            'path' => $this->backupPath,
+            '--confirm' => 'RESTORE',
+        ])->assertSuccessful();
+
+        $this->assertSame('backup-value', DB::connection()->table('sync_state')->where('key', 'proof')->value('value'));
+        $preRestoreBackups = File::glob(dirname($this->sourcePath).'/pre-restore-*.sqlite');
+        $this->assertCount(1, $preRestoreBackups);
+
+        $preRestore = new SQLite3($preRestoreBackups[0], SQLITE3_OPEN_READONLY);
+        $this->assertSame('current-value', $preRestore->querySingle("SELECT value FROM sync_state WHERE key = 'proof'"));
+        $preRestore->close();
     }
 }

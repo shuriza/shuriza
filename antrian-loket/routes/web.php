@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CounterController;
+use App\Http\Controllers\OperationsController;
 use App\Http\Controllers\TicketPrintController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,3 +22,8 @@ Route::post('/layanan/{service}/ambil', [CounterController::class, 'issue'])->na
 // Pratinjau dan cetak tiket ke printer lokal.
 Route::get('/tiket/{ticket}/cetak', [TicketPrintController::class, 'show'])->name('tiket.cetak');
 Route::post('/tiket/{ticket}/cetak', [TicketPrintController::class, 'print'])->name('tiket.cetak.kirim');
+
+// Status dan tindakan operasional lokal.
+Route::get('/operasional', [OperationsController::class, 'index'])->name('operasional.index');
+Route::post('/operasional/sinkronkan', [OperationsController::class, 'sync'])->name('operasional.sinkronkan');
+Route::post('/operasional/backup', [OperationsController::class, 'backup'])->name('operasional.backup');

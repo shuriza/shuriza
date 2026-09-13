@@ -65,6 +65,48 @@ class InspectOutboxHealthTest extends TestCase
         $this->artisan('antrian:outbox-health')->assertSuccessful();
     }
 
+    public function test_prune_is_a_non_destructive_preview_by_default(): void
+    {
+        OutboxEntry::query()->forceCreate($this->entry('event-old-synced', [
+            'synced_at' => now()->subDays(31),
+        ]));
+
+        $this->artisan('antrian:outbox-prune', ['--days' => 30])
+            ->expectsOutputToContain('Pratinjau: 1')
+            ->expectsOutputToContain('Tidak ada data yang dihapus')
+            ->assertSuccessful();
+
+        $this->assertSame(1, OutboxEntry::query()->count());
+    }
+
+    public function test_prune_deletes_only_synced_entries_past_retention(): void
+    {
+        OutboxEntry::query()->forceCreate($this->entry('event-old-synced', [
+            'synced_at' => now()->subDays(31),
+        ]));
+        OutboxEntry::query()->forceCreate($this->entry('event-recent-synced', [
+            'synced_at' => now()->subDays(29),
+        ]));
+        OutboxEntry::query()->forceCreate($this->entry('event-old-pending', [
+            'created_at' => now()->subDays(60),
+        ]));
+
+        $this->artisan('antrian:outbox-prune', ['--days' => 30, '--execute' => true])
+            ->expectsOutputToContain('1 entry outbox tersinkron dihapus')
+            ->assertSuccessful();
+
+        $this->assertFalse(OutboxEntry::query()->where('event_uuid', 'event-old-synced')->exists());
+        $this->assertTrue(OutboxEntry::query()->where('event_uuid', 'event-recent-synced')->exists());
+        $this->assertTrue(OutboxEntry::pending()->where('event_uuid', 'event-old-pending')->exists());
+    }
+
+    public function test_prune_rejects_zero_day_retention(): void
+    {
+        $this->artisan('antrian:outbox-prune', ['--days' => 0, '--execute' => true])
+            ->expectsOutputToContain('Retensi outbox minimal 1 hari')
+            ->assertFailed();
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>

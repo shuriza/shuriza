@@ -41,6 +41,7 @@ return [
         'outbox_pending_warning' => (int) env('ANTRIAN_OUTBOX_PENDING_WARNING', 1000),
         'outbox_oldest_hours_warning' => (int) env('ANTRIAN_OUTBOX_OLDEST_HOURS_WARNING', 24),
         'outbox_attempts_warning' => (int) env('ANTRIAN_OUTBOX_ATTEMPTS_WARNING', 5),
+        'outbox_synced_retention_days' => (int) env('ANTRIAN_OUTBOX_SYNCED_RETENTION_DAYS', 30),
     ],
 
     /*
