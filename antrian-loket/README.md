@@ -160,7 +160,7 @@ npm ci --ignore-scripts
 npm run build
 ```
 
-Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **82 tes dan 325 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
+Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **84 tes dan 331 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
 
 Konvensi tim tersedia di `.ai/rules/index.md`. Alur review, invariant yang wajib dijaga, konflik gaya yang ditunda, dan acceptance rilis berikutnya dijelaskan dalam [panduan kualitas dan roadmap](docs/quality-roadmap.md).
 
@@ -244,6 +244,8 @@ Status pengiriman tiap event dibaca dari outbox dan dibedakan menjadi tiga:
 - **Menunggu dikirim** — pending tanpa error.
 
 Event yang **tidak** memiliki baris outbox ditandai **Diterima dari pusat**. Itu perilaku benar, bukan data hilang: event hasil import sengaja tidak menghasilkan outbox echo. Durasi tunggu dan layanan dihitung dari tiket ini saja, bukan rata-rata layanan.
+
+Durasi pada halaman jejak dihitung dari **event audit**, bukan kolom `called_at`/`finished_at` tiket. Alasannya: `restore()` menihilkan kolom tersebut dengan sengaja, sehingga tiket yang pernah dipanggil akan tampak belum pernah dilayani. Awal pelayanan diambil dari pengumuman terakhir, jadi panggil ulang tidak menghitung waktu ketika warga belum sampai ke loket.
 
 ## Batas penggunaan multi-perangkat dan rilis
 

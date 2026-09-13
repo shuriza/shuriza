@@ -170,4 +170,63 @@ class TicketHistoryTest extends TestCase
 
         return $response->viewData('tickets')->pluck('label')->all();
     }
+
+    /**
+     * `restore()` menihilkan `called_at`/`finished_at` dengan sengaja, jadi
+     * durasi harus dihitung dari jejak audit. Kalau dibaca dari kolom tiket,
+     * tiket yang pernah dipanggil tampak belum pernah dilayani.
+     */
+    public function test_wait_duration_survives_a_restore_that_clears_ticket_columns(): void
+    {
+        Carbon::setTestNow('2026-09-13 08:00:00');
+
+        $service = Service::factory()->code('A')->create();
+        $counter = Counter::factory()->for($service)->create(['is_open' => true]);
+        $queue = $this->app->make(QueueService::class);
+
+        $ticket = $queue->issue($service);
+
+        Carbon::setTestNow('2026-09-13 08:06:00');
+        $called = $queue->callNext($counter);
+
+        Carbon::setTestNow('2026-09-13 08:08:00');
+        $skipped = $queue->skip($called->fresh(), $counter);
+
+        Carbon::setTestNow('2026-09-13 08:10:00');
+        $queue->restore($skipped->fresh(), $counter);
+
+        // Kolom tiket sudah dibersihkan oleh restore.
+        $this->assertNull($ticket->fresh()->called_at);
+
+        // Tetapi jejak audit masih tahu tiket menunggu 6 menit.
+        $this->get(route('riwayat.show', $ticket))
+            ->assertOk()
+            ->assertViewHas('waitMinutes', 6.0);
+    }
+
+    public function test_service_duration_uses_the_latest_call_and_finish_events(): void
+    {
+        Carbon::setTestNow('2026-09-13 09:00:00');
+
+        $service = Service::factory()->code('A')->create();
+        $counter = Counter::factory()->for($service)->create(['is_open' => true]);
+        $queue = $this->app->make(QueueService::class);
+
+        $ticket = $queue->issue($service);
+
+        Carbon::setTestNow('2026-09-13 09:05:00');
+        $called = $queue->callNext($counter);
+
+        // Panggilan ulang memindahkan awal pelayanan yang sebenarnya.
+        Carbon::setTestNow('2026-09-13 09:09:00');
+        $queue->recall($called->fresh(), $counter);
+
+        Carbon::setTestNow('2026-09-13 09:12:00');
+        $queue->finish($called->fresh(), $counter);
+
+        $this->get(route('riwayat.show', $ticket))
+            ->assertOk()
+            ->assertViewHas('waitMinutes', 5.0)
+            ->assertViewHas('serviceMinutes', 3.0);
+    }
 }

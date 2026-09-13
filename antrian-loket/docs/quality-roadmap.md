@@ -44,7 +44,9 @@ Pilih file test yang sesuai perubahan; contoh di atas untuk sinkronisasi. Test m
 - **Laporan:** metrik harian adalah data lokal per perangkat. Jangan menyebutnya laporan kantor gabungan sebelum server pusat dan kontrak agregasi tersedia. Hitungan panggil ulang/pengembalian berasal dari audit event, bukan status akhir tiket, jadi satu tiket dapat menyumbang lebih dari sekali.
 - **Agregasi SQL:** `pluck()` dengan ekspresi `DB::raw` tidak memberi alias kolom dan menghasilkan baris tanpa properti yang diminta. Gunakan `selectRaw(... as alias)` lalu `pluck('alias_nilai', 'alias_kunci')`.
 - **Riwayat tiket:** halaman jejak hanya membaca. Event tanpa baris outbox berarti hasil import dari pusat, bukan data hilang; jangan menampilkannya sebagai pending atau membuat outbox echo untuk melengkapinya.
+- **Durasi jejak:** hitung dari event audit, bukan kolom `called_at`/`finished_at`. `restore()` menihilkan kolom itu dengan sengaja. Awal pelayanan adalah pengumuman terakhir (`called` atau `recalled`); pasangan event yang tidak berurutan menghasilkan durasi kosong, bukan nol atau negatif.
 - **Assertion halaman:** jangan membuktikan hasil pencarian dengan `assertSee` pada label tiket. Teks placeholder/contoh pada form dapat meloloskan assertion tanpa hasil apa pun; periksa `viewData` atau baris tabel.
+- **Tombol disabled:** jangan menandai disabled hanya dengan `disabled:opacity-40` pada warna aksi. Pada latar gelap, emerald pudar masih terbaca sebagai tombol utama yang aktif; pakai warna netral seperti tombol disabled lain di konsol.
 
 ## Quality gate otomatis
 
@@ -78,6 +80,19 @@ Lulus lokal tidak membuktikan GitHub Actions lulus. Bukti CI harus diambil dari 
 - Mutation check: menghapus cabang event-import membuat tes gagal, dan mengganti urutan timeline menjadi `orderByDesc('id')` juga gagal. Keduanya kembali lulus setelah sumber dipulihkan.
 - Verifikasi lokal: 82 tes lulus dengan 325 assertions; Pint bersih; `npm run build` berhasil. Smoke test terhadap `php artisan serve` memastikan pencarian `q=1` menemukan tiket yang benar, timeline memuat empat event berurutan, dan ketiga badge status pengiriman muncul.
 - Belum diverifikasi: tampilan jejak untuk event yang benar-benar berasal dari server pusat menunggu server tersebut tersedia; yang diuji sekarang adalah jalur `recordImported()`.
+
+## Verifikasi visual Chromium 13 September 2026
+
+Dijalankan dengan Playwright + Chromium yang sudah ada di mesin (`ms-playwright/chromium-1243`), lewat skrip sementara yang dihapus setelah verifikasi. Skrip menyiapkan state sendiri melalui UI (ambil, panggil, panggil ulang, lewati, kembalikan) supaya tidak bergantung pada sisa data.
+
+Dua cacat ditemukan dari screenshot, bukan dari suite:
+
+1. Kartu **Menunggu** dan **Dilayani** menampilkan `—` untuk tiket yang jelas punya tujuh event dan dua kali dipanggil. Penyebabnya durasi dibaca dari kolom tiket, sedangkan `restore()` menihilkan kolom itu. Diperbaiki dengan menghitung dari event audit; dua regression case ditambahkan.
+2. Tombol **Panggil Berikutnya** dalam keadaan disabled hanya memakai `disabled:opacity-40`, sehingga pada latar gelap masih terbaca sebagai tombol utama hijau yang aktif. Diseragamkan dengan warna netral seperti tombol disabled lain.
+
+Verifikasi akhir: 84 tes lulus dengan 331 assertions; Pint bersih; `npm run build` berhasil; nol error console/HTTP pada lima halaman yang dipotret. Klik sungguhan pada panggil ulang dan kembalikan menghasilkan flash message serta perubahan state yang benar.
+
+Catatan alat: `assertSee`/regex ber-anchor tidak dapat dipercaya untuk memverifikasi surface ini. Dua kali alat verifikasinya sendiri yang salah — placeholder form meloloskan `assertSee`, dan `^` gagal karena teks badge punya whitespace di depan. Verifikasi UI harus memeriksa data terstruktur atau screenshot, bukan pencocokan teks mentah.
 
 ## Keputusan gaya yang tetap ditunda
 

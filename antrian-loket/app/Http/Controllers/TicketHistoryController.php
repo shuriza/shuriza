@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TicketStatus;
+use App\Enums\TicketEventType;
 use App\Models\OutboxEntry;
 use App\Models\Ticket;
+use App\Models\TicketEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 /**
@@ -79,17 +81,67 @@ class TicketHistoryController extends Controller
             'ticket' => $ticket,
             'events' => $events,
             'outbox' => $outbox,
-            'waitMinutes' => $this->durationMinutes($ticket->issued_at, $ticket->called_at),
-            'serviceMinutes' => $ticket->status === TicketStatus::Selesai
-                ? $this->durationMinutes($ticket->called_at, $ticket->finished_at)
-                : null,
+            'waitMinutes' => $this->durationMinutes(
+                $this->firstOccurrence($events, TicketEventType::Issued),
+                $this->firstOccurrence($events, TicketEventType::Called),
+            ),
+            'serviceMinutes' => $this->durationMinutes(
+                $this->lastServiceStart($events),
+                $this->lastOccurrence($events, TicketEventType::Finished),
+            ),
             'pendingCount' => OutboxEntry::pending()->count(),
         ]);
+    }
+
+    /**
+     * Durasi diturunkan dari jejak audit, bukan kolom tiket.
+     *
+     * `restore()` menihilkan `called_at`/`finished_at` dengan sengaja, jadi
+     * membaca kolom itu membuat tiket yang pernah dipanggil tampak belum
+     * pernah dilayani. Event menyimpan waktu sebenarnya.
+     *
+     * @param  Collection<int, TicketEvent>  $events
+     */
+    private function firstOccurrence($events, TicketEventType $type): ?Carbon
+    {
+        return $events->first(fn (TicketEvent $event): bool => $event->type === $type)?->occurred_at;
+    }
+
+    /**
+     * @param  Collection<int, TicketEvent>  $events
+     */
+    private function lastOccurrence($events, TicketEventType $type): ?Carbon
+    {
+        return $events->last(fn (TicketEvent $event): bool => $event->type === $type)?->occurred_at;
+    }
+
+    /**
+     * Awal pelayanan adalah pengumuman terakhir sebelum tiket selesai.
+     *
+     * Panggilan ulang berarti warga belum sampai ke loket pada panggilan
+     * sebelumnya, jadi pelayanan belum benar-benar dimulai saat itu.
+     *
+     * @param  Collection<int, TicketEvent>  $events
+     */
+    private function lastServiceStart($events): ?Carbon
+    {
+        return $events
+            ->last(fn (TicketEvent $event): bool => in_array(
+                $event->type,
+                [TicketEventType::Called, TicketEventType::Recalled],
+                true,
+            ))?->occurred_at;
     }
 
     private function durationMinutes(?Carbon $from, ?Carbon $to): ?float
     {
         if ($from === null || $to === null) {
+            return null;
+        }
+
+        // Panggilan ulang/pengembalian bisa membuat pasangan event tidak
+        // berurutan; durasi negatif adalah data tidak bermakna, bukan nol.
+        if ($to->lessThan($from)) {
             return null;
         }
 

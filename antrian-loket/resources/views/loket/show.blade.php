@@ -53,7 +53,11 @@
                     <button
                         type="submit"
                         @disabled($currentTicket !== null)
-                        class="w-full rounded-xl bg-emerald-600 px-6 py-5 text-lg font-bold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40"
+                        {{-- State disabled harus sama dengan tombol disabled lain di bawah:
+                             emerald pudar masih terbaca sebagai tombol utama yang aktif. --}}
+                        class="w-full rounded-xl px-6 py-5 text-lg font-bold transition {{ $currentTicket !== null
+                            ? 'cursor-not-allowed bg-slate-800 text-slate-500'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-500' }}"
                     >
                         Panggil Berikutnya
                     </button>
