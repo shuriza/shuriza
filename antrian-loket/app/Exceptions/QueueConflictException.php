@@ -26,6 +26,16 @@ class QueueConflictException extends RuntimeException
         return new self("Tiket {$label} belum dipanggil, jadi tidak bisa diubah.");
     }
 
+    public static function notSkipped(string $label): self
+    {
+        return new self("Tiket {$label} tidak berstatus dilewati, jadi tidak bisa dikembalikan ke antrean.");
+    }
+
+    public static function notFromToday(string $label, string $serviceDate): self
+    {
+        return new self("Tiket {$label} berasal dari layanan tanggal {$serviceDate}, jadi tidak bisa dikembalikan ke antrean hari ini.");
+    }
+
     public static function counterClosed(string $counterName): self
     {
         return new self("Loket {$counterName} sedang tutup.");

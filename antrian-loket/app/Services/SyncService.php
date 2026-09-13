@@ -170,6 +170,15 @@ class SyncService
                     }
 
                     $ticket ??= new Ticket;
+
+                    // Panggilan ulang memindahkan waktu panggil ke event ini;
+                    // panggilan pertama mempertahankan waktu yang sudah ada.
+                    $calledAt = match (true) {
+                        $remote['status'] === TicketStatus::Menunggu => null,
+                        $remote['event_type'] === TicketEventType::Recalled => $remote['occurred_at'],
+                        default => $ticket->called_at ?? $remote['occurred_at'],
+                    };
+
                     $ticket->forceFill([
                         'uuid' => $remote['ticket_uuid'],
                         'service_id' => $service->id,
@@ -181,7 +190,7 @@ class SyncService
                         'revision' => $remote['revision'],
                         'origin_device_id' => $remote['origin_device_id'],
                         'issued_at' => $ticket->issued_at ?? $remote['occurred_at'],
-                        'called_at' => $remote['status'] === TicketStatus::Menunggu ? null : ($ticket->called_at ?? $remote['occurred_at']),
+                        'called_at' => $calledAt,
                         'finished_at' => $remote['status']->isTerminal() ? $remote['occurred_at'] : null,
                     ]);
 
@@ -339,7 +348,7 @@ class SyncService
         $label = $this->requireString($remote['label'] ?? null, 'label');
         $occurredAt = Carbon::parse($this->requireString($remote['occurred_at'] ?? null, 'occurred_at'));
 
-        if (! $this->eventTypeMatchesStatus($eventType, $status)) {
+        if (! $eventType->matchesStatus($status)) {
             throw new \UnexpectedValueException('event_type tidak cocok dengan status pusat');
         }
 
@@ -363,16 +372,6 @@ class SyncService
             'label' => $label,
             'occurred_at' => $occurredAt,
         ];
-    }
-
-    private function eventTypeMatchesStatus(TicketEventType $eventType, TicketStatus $status): bool
-    {
-        return match ($eventType) {
-            TicketEventType::Issued => $status === TicketStatus::Menunggu,
-            TicketEventType::Called => $status === TicketStatus::Dipanggil,
-            TicketEventType::Finished => $status === TicketStatus::Selesai,
-            TicketEventType::Skipped => $status === TicketStatus::Dilewati,
-        };
     }
 
     private function requirePositiveInt(mixed $value, string $field): int

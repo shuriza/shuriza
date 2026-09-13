@@ -9,6 +9,7 @@ Aplikasi desktop lokal untuk petugas loket pelayanan publik. Dibangun dengan Lar
 | Area | Status | Batas |
 |---|---|---|
 | Operasi loket offline | Siap diuji operator | Ambil, panggil, lewati, selesai, dan audit/outbox berjalan lokal |
+| Pemulihan antrean | Tersedia | Panggil ulang dan kembalikan tiket dilewati; terbatas pada tanggal layanan hari ini dan loket pemilik |
 | Printer NativePHP | Terimplementasi | Validasi akhir memerlukan printer fisik 58 mm dan driver sasaran |
 | Sinkronisasi | Klien dan resolusi konflik tersedia | Server pusat dan alokasi nomor lintas perangkat belum tersedia |
 | Backup dan kesehatan outbox | Tersedia | Restore tetap manual dan dilakukan ketika aplikasi ditutup |
@@ -31,6 +32,7 @@ Petugas loket pelayanan publik, dengan contoh layanan perizinan, legalisasi, dan
 
 - Nomor tiket harian per layanan, misalnya `A001`, tersimpan dengan tanggal `Y-m-d`.
 - Pemilih loket, konsol panggil/selesai/lewati, jumlah menunggu, dan estimasi waktu berdasarkan durasi layanan.
+- Panggil ulang tiket yang sedang dilayani tanpa mengubah status, dan kembalikan tiket dilewati ke antrean dengan mempertahankan nomor aslinya.
 - Pratinjau struk 58 mm dan pengiriman ke printer lokal melalui NativePHP; pencetakan browser tetap tersedia untuk pengembangan.
 - Identitas perangkat persisten, audit peristiwa tiket, dan outbox untuk perubahan yang belum dikirim.
 - Klien sinkronisasi push/pull dan resolusi konflik. **Server pusat tidak disertakan.** Mengisi endpoint saja tidak menyediakan server atau menjamin sinkronisasi berhasil.
@@ -39,7 +41,7 @@ Petugas loket pelayanan publik, dengan contoh layanan perizinan, legalisasi, dan
 - Halaman Operasional untuk melihat kesehatan outbox, kegagalan pending, menjalankan sinkronisasi manual, dan membuat backup lokal.
 - Validasi backup, restore offline dengan backup pra-restore, dan retensi aman untuk outbox yang sudah tersinkron.
 - Pengaturan lokal untuk menambah/mengubah layanan, estimasi, loket, petugas, serta status aktif/buka tanpa menghapus histori.
-- Laporan harian per layanan: tiket terbit, status, rata-rata waktu tunggu, dan rata-rata waktu pelayanan.
+- Laporan harian per layanan: tiket terbit, status, jumlah panggil ulang/pengembalian, rata-rata waktu tunggu, dan rata-rata waktu pelayanan.
 - Release gate yang menolak distribusi publik tanpa secure bundle, production config, identitas/versi aplikasi, dan code signing.
 
 ## Kenapa native, bukan web biasa?
@@ -156,7 +158,7 @@ npm ci --ignore-scripts
 npm run build
 ```
 
-Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **63 tes dan 245 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
+Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **75 tes dan 297 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
 
 Konvensi tim tersedia di `.ai/rules/index.md`. Alur review, invariant yang wajib dijaga, konflik gaya yang ditunda, dan acceptance rilis berikutnya dijelaskan dalam [panduan kualitas dan roadmap](docs/quality-roadmap.md).
 
@@ -209,6 +211,21 @@ Menu **Pengaturan** mengelola data lokal tanpa menghapus histori. Guard yang ber
 - layanan nonaktif tidak dapat menerbitkan tiket baru.
 
 Menu **Laporan** menampilkan ringkasan satu tanggal untuk database perangkat saat ini. Rata-rata tunggu dihitung dari `issued_at` sampai `called_at`; rata-rata pelayanan dari `called_at` sampai `finished_at`. Angka ini belum menggabungkan instalasi lain karena server pusat belum tersedia.
+
+## Pemulihan antrean di konsol loket
+
+Dua aksi menutup jalan buntu operator tanpa memaksa warga mengambil nomor baru:
+
+- **Panggil Ulang** mengumumkan kembali tiket yang sedang dilayani. Status tetap `dipanggil` dan loket tidak berubah; hanya `called_at`, `revision`, dan perangkat asal diperbarui. Karena `revision` naik, pengumuman terakhir menang saat resolusi konflik terhadap salinan lama di perangkat lain.
+- **Kembalikan ke Antrean** memulihkan tiket `dilewati` menjadi `menunggu` dengan nomor aslinya, sehingga warga yang datang terlambat tidak kehilangan urutan. Tiket kembali ke posisi nomornya, bukan ke ekor antrean.
+
+Guard yang berlaku:
+
+- hanya loket yang melewati tiket dapat mengembalikannya;
+- hanya tiket dengan tanggal layanan hari ini dapat dikembalikan, karena `callNext` memfilter tanggal dan tiket hari lain akan menunggu tanpa pernah dipanggil;
+- tiket yang belum dilewati (masih menunggu, dipanggil, atau sudah selesai) ditolak.
+
+Panggil ulang dan pengembalian dicatat sebagai event audit `recalled` dan `restored` beserta pasangan outbox-nya, dan dihitung terpisah pada laporan harian. Satu tiket dapat menyumbang lebih dari satu panggil ulang, jadi angka ini bukan jumlah tiket unik.
 
 ## Batas penggunaan multi-perangkat dan rilis
 

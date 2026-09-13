@@ -165,7 +165,7 @@ class ConflictResolver
             return null;
         }
 
-        if (! $this->eventTypeMatchesStatus($eventType, $status)) {
+        if (! $eventType->matchesStatus($status)) {
             return null;
         }
 
@@ -350,15 +350,5 @@ class ConflictResolver
         $value = trim($value);
 
         return $value === '' ? null : $value;
-    }
-
-    private function eventTypeMatchesStatus(TicketEventType $eventType, TicketStatus $status): bool
-    {
-        return match ($eventType) {
-            TicketEventType::Issued => $status === TicketStatus::Menunggu,
-            TicketEventType::Called => $status === TicketStatus::Dipanggil,
-            TicketEventType::Finished => $status === TicketStatus::Selesai,
-            TicketEventType::Skipped => $status === TicketStatus::Dilewati,
-        };
     }
 }

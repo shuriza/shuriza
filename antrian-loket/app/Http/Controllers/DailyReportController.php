@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TicketEventType;
 use App\Enums\TicketStatus;
 use App\Models\OutboxEntry;
 use App\Models\Service;
 use App\Models\Ticket;
+use App\Models\TicketEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -47,6 +49,25 @@ class DailyReportController extends Controller
             ->orderBy('services.code')
             ->get();
 
+        // Panggil ulang dan pengembalian ke antrean tidak terlihat dari status
+        // akhir tiket, jadi keduanya dihitung dari audit event.
+        $interventions = TicketEvent::query()
+            ->join('tickets', 'tickets.id', '=', 'ticket_events.ticket_id')
+            ->where('tickets.service_date', $date)
+            ->whereIn('ticket_events.type', [
+                TicketEventType::Recalled->value,
+                TicketEventType::Restored->value,
+            ])
+            ->selectRaw("tickets.service_id || ':' || ticket_events.type as intervention_key")
+            ->selectRaw('COUNT(*) as intervention_count')
+            ->groupBy('tickets.service_id', 'ticket_events.type')
+            ->pluck('intervention_count', 'intervention_key');
+
+        $services->each(function (Service $service) use ($interventions): void {
+            $service->recalled_count = (int) $interventions->get($service->id.':'.TicketEventType::Recalled->value, 0);
+            $service->restored_count = (int) $interventions->get($service->id.':'.TicketEventType::Restored->value, 0);
+        });
+
         return view('laporan.harian', [
             'date' => $date,
             'services' => $services,
@@ -55,6 +76,8 @@ class DailyReportController extends Controller
             'calledCount' => (int) $totals->get(TicketStatus::Dipanggil->value, 0),
             'finishedCount' => (int) $totals->get(TicketStatus::Selesai->value, 0),
             'skippedCount' => (int) $totals->get(TicketStatus::Dilewati->value, 0),
+            'recalledCount' => $services->sum('recalled_count'),
+            'restoredCount' => $services->sum('restored_count'),
             'pendingCount' => OutboxEntry::pending()->count(),
         ]);
     }

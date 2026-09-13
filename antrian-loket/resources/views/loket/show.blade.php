@@ -89,6 +89,22 @@
                     </button>
                 @endif
             </div>
+
+            {{-- Panggil ulang: warga belum mendengar panggilan pertama. --}}
+            @if ($currentTicket)
+                <form method="POST" action="{{ route('loket.panggil-ulang', [$counter, $currentTicket]) }}" class="mt-3">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="w-full rounded-xl border border-emerald-600 px-6 py-3 text-base font-semibold text-emerald-400 transition hover:bg-emerald-600 hover:text-white"
+                    >
+                        Panggil Ulang {{ $currentTicket->label }}
+                    </button>
+                </form>
+                <p class="mt-2 text-center text-xs text-slate-500">
+                    Nomor dan loket tetap sama; hanya waktu panggil diperbarui.
+                </p>
+            @endif
         </section>
 
         <aside class="space-y-6">
@@ -138,4 +154,35 @@
             </ol>
         @endif
     </section>
+
+    {{-- Tiket dilewati yang masih bisa dikembalikan ke antrean hari ini. --}}
+    @if ($skippedTickets->isNotEmpty())
+        <section class="mt-6 rounded-2xl border border-amber-800 bg-slate-900 p-6">
+            <h2 class="text-sm font-medium uppercase tracking-wide text-amber-400">Tiket Dilewati</h2>
+            <p class="mt-1 mb-4 text-sm text-slate-400">
+                Warga yang datang terlambat dapat dikembalikan ke antrean tanpa mengambil nomor baru.
+            </p>
+
+            <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach ($skippedTickets as $ticket)
+                    <li class="rounded-xl border border-slate-700 bg-slate-800 px-4 py-4 text-center">
+                        <span class="block text-xl font-bold text-slate-100">{{ $ticket->label }}</span>
+                        <span class="mt-1 block text-xs text-slate-500">
+                            Dilewati {{ $ticket->finished_at?->format('H:i') }}
+                        </span>
+
+                        <form method="POST" action="{{ route('loket.kembalikan', [$counter, $ticket]) }}" class="mt-3">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="w-full rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-600"
+                            >
+                                Kembalikan ke Antrean
+                            </button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
 @endsection

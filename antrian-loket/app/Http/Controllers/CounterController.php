@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TicketStatus;
 use App\Exceptions\OfficeConfigurationException;
 use App\Exceptions\QueueConflictException;
 use App\Models\Counter;
@@ -72,10 +73,20 @@ class CounterController extends Controller
 
         $waitingCount = $this->queue->waitingCount($counter->service, $serviceDate);
 
+        // Tiket yang dilewati loket ini hari ini masih bisa dikembalikan ke
+        // antrean, jadi operator perlu melihatnya.
+        $skippedTickets = Ticket::query()
+            ->forDate($serviceDate)
+            ->where('counter_id', $counter->id)
+            ->where('status', TicketStatus::Dilewati->value)
+            ->orderBy('number')
+            ->get();
+
         return view('loket.show', [
             'counter' => $counter,
             'currentTicket' => $counter->currentTicket(),
             'waitingTickets' => $waiting,
+            'skippedTickets' => $skippedTickets,
             'waitingCount' => $waitingCount,
             'estimatedWaitMinutes' => $waitingCount * (int) $counter->service->estimated_minutes,
             'pendingCount' => OutboxEntry::pending()->count(),
@@ -129,6 +140,38 @@ class CounterController extends Controller
         return redirect()
             ->route('loket.show', $counter)
             ->with('status', "Tiket {$ticket->label} dilewati.");
+    }
+
+    /**
+     * Panggil ulang tiket yang sedang dilayani.
+     */
+    public function recall(Counter $counter, Ticket $ticket): RedirectResponse
+    {
+        try {
+            $ticket = $this->queue->recall($ticket, $counter);
+        } catch (QueueConflictException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('loket.show', $counter)
+            ->with('status', "Tiket {$ticket->label} dipanggil ulang.");
+    }
+
+    /**
+     * Kembalikan tiket yang dilewati ke antrean menunggu.
+     */
+    public function restore(Counter $counter, Ticket $ticket): RedirectResponse
+    {
+        try {
+            $ticket = $this->queue->restore($ticket, $counter);
+        } catch (QueueConflictException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('loket.show', $counter)
+            ->with('status', "Tiket {$ticket->label} dikembalikan ke antrean dan mempertahankan nomornya.");
     }
 
     /**

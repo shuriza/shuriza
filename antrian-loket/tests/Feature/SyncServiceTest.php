@@ -289,6 +289,129 @@ class SyncServiceTest extends TestCase
         ], $overrides);
     }
 
+    /**
+     * Setiap jenis event membawa status yang sah. Pusat yang mengirim
+     * pasangan tidak konsisten harus ditolak, bukan menulis status asal.
+     */
+    public function test_pull_rejects_remote_events_whose_type_contradicts_their_status(): void
+    {
+        $this->configureSync();
+        Service::factory()->code('A')->create();
+        SyncState::query()->updateOrCreate(['key' => 'last_pull_cursor'], ['value' => 'cursor-awal']);
+
+        Http::fake([
+            '*' => Http::response([
+                'events' => [
+                    // `restored` hanya sah bersama status menunggu.
+                    $this->remoteEvent([
+                        'event_type' => TicketEventType::Restored->value,
+                        'status' => TicketStatus::Selesai->value,
+                        'revision' => 4,
+                    ]),
+                ],
+                'cursor' => 'cursor-baru',
+            ], 200),
+        ]);
+
+        $report = app(SyncService::class)->pull();
+
+        $this->assertNotNull($report->error);
+        $this->assertStringContainsString('tidak cocok dengan status pusat', $report->error);
+        $this->assertSame('cursor-awal', SyncState::query()->find('last_pull_cursor')?->value);
+        $this->assertSame(0, Ticket::query()->count());
+    }
+
+    public function test_pull_applies_a_remote_restore_and_detaches_the_counter(): void
+    {
+        $this->configureSync();
+        $service = Service::factory()->code('A')->create();
+
+        // Tiket lokal masih dilewati; pusat sudah mengembalikannya ke antrean.
+        $ticket = Ticket::factory()->for($service)->skipped()->create([
+            'service_date' => now()->toDateString(),
+            'number' => 4,
+            'label' => 'A004',
+            'revision' => 3,
+            'origin_device_id' => 'loket-lokal',
+        ]);
+
+        Http::fake([
+            '*' => Http::response([
+                'events' => [
+                    $this->remoteEvent([
+                        'ticket_uuid' => $ticket->uuid,
+                        'event_type' => TicketEventType::Restored->value,
+                        'status' => TicketStatus::Menunggu->value,
+                        'number' => 4,
+                        'label' => 'A004',
+                        'revision' => 4,
+                        'origin_device_id' => 'loket-pusat',
+                    ]),
+                ],
+                'cursor' => 'cursor-restore',
+            ], 200),
+        ]);
+
+        $report = app(SyncService::class)->pull();
+
+        $this->assertNull($report->error);
+        $this->assertSame(1, $report->sent);
+
+        $fresh = $ticket->fresh();
+        $this->assertSame(TicketStatus::Menunggu, $fresh->status);
+        $this->assertSame(4, $fresh->number);
+        $this->assertNull($fresh->counter_id);
+        $this->assertNull($fresh->called_at);
+        $this->assertNull($fresh->finished_at);
+    }
+
+    public function test_pull_advances_call_time_for_a_remote_recall(): void
+    {
+        $this->configureSync();
+        $service = Service::factory()->code('A')->create();
+
+        $calledAt = now()->subMinutes(10);
+        $ticket = Ticket::factory()->for($service)->create([
+            'service_date' => now()->toDateString(),
+            'number' => 2,
+            'label' => 'A002',
+            'status' => TicketStatus::Dipanggil,
+            'called_at' => $calledAt,
+            'revision' => 2,
+            'origin_device_id' => 'loket-lokal',
+        ]);
+
+        $recalledAt = now();
+
+        Http::fake([
+            '*' => Http::response([
+                'events' => [
+                    $this->remoteEvent([
+                        'ticket_uuid' => $ticket->uuid,
+                        'event_type' => TicketEventType::Recalled->value,
+                        'status' => TicketStatus::Dipanggil->value,
+                        'number' => 2,
+                        'label' => 'A002',
+                        'revision' => 3,
+                        'origin_device_id' => 'loket-pusat',
+                        'occurred_at' => $recalledAt->toIso8601String(),
+                    ]),
+                ],
+                'cursor' => 'cursor-recall',
+            ], 200),
+        ]);
+
+        $report = app(SyncService::class)->pull();
+
+        $this->assertNull($report->error);
+
+        // Panggilan ulang memindahkan waktu panggil; panggilan pertama tidak.
+        $fresh = $ticket->fresh();
+        $this->assertSame(TicketStatus::Dipanggil, $fresh->status);
+        $this->assertTrue($fresh->called_at->greaterThan($calledAt));
+        $this->assertNull($fresh->finished_at);
+    }
+
     private function configureSync(): void
     {
         config([

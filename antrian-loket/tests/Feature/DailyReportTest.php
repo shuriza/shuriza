@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Enums\TicketStatus;
+use App\Models\Counter;
 use App\Models\Service;
 use App\Models\Ticket;
+use App\Services\QueueService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -78,5 +80,37 @@ class DailyReportTest extends TestCase
             'called_at' => $calledTime === null ? null : Carbon::parse("{$date} {$calledTime}"),
             'finished_at' => $finishedTime === null ? null : Carbon::parse("{$date} {$finishedTime}"),
         ]);
+    }
+
+    /**
+     * Panggil ulang dan pengembalian tidak terlihat dari status akhir tiket,
+     * jadi laporan menghitungnya dari audit event.
+     */
+    public function test_daily_report_counts_recall_and_restore_interventions_per_service(): void
+    {
+        $this->withoutVite();
+        $service = Service::factory()->code('A')->create();
+        $quiet = Service::factory()->code('B')->create();
+        $counter = Counter::factory()->for($service)->create(['is_open' => true]);
+        $queue = $this->app->make(QueueService::class);
+
+        // Satu tiket dipanggil ulang dua kali, lalu dilewati dan dikembalikan.
+        $queue->issue($service);
+        $called = $queue->callNext($counter);
+        $queue->recall($called, $counter);
+        $queue->recall($called->fresh(), $counter);
+        $skipped = $queue->skip($called->fresh(), $counter);
+        $queue->restore($skipped->fresh(), $counter);
+
+        $this->get(route('laporan.harian', ['date' => now()->toDateString()]))
+            ->assertOk()
+            ->assertViewHas('recalledCount', 2)
+            ->assertViewHas('restoredCount', 1)
+            ->assertViewHas('services', function ($services): bool {
+                return (int) $services->firstWhere('code', 'A')->recalled_count === 2
+                    && (int) $services->firstWhere('code', 'A')->restored_count === 1
+                    && (int) $services->firstWhere('code', 'B')->recalled_count === 0;
+            })
+            ->assertSee('Panggil ulang');
     }
 }

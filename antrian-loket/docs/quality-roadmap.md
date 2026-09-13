@@ -30,6 +30,8 @@ Pilih file test yang sesuai perubahan; contoh di atas untuk sinkronisasi. Test m
 - **Identitas:** integer `id` adalah primary key lokal; UUID adalah identitas lintas perangkat. Lookup UUID tidak memakai `whereKey()` pada model ber-PK integer.
 - **Atomicity lokal:** perubahan tiket, audit event, dan outbox harus berhasil atau rollback bersama. Akses jaringan tidak berada di transaksi mutasi lokal.
 - **Kepemilikan:** satu loket tidak boleh menyelesaikan atau melewati tiket loket lain; perubahan state harus memeriksa state dan kepemilikan saat write, bukan hanya sebelum write.
+- **Pemulihan antrean:** panggil ulang tidak mengubah status dan tetap menaikkan `revision`; pengembalian tiket dilewati mempertahankan nomor asli, melepas `counter_id`, dan hanya berlaku untuk tanggal layanan hari ini oleh loket pemiliknya.
+- **Pasangan event/status:** `TicketEventType::resultingStatus()` adalah satu-satunya sumber kebenaran. ConflictResolver dan SyncService memakai `matchesStatus()`; jangan menulis ulang match itu per pemanggil, karena case enum baru harus gagal kompilasi bukan lolos diam-diam.
 - **Replay:** event remote yang sudah diterima tidak menghasilkan audit ganda atau outbox echo. Kegagalan batch tidak boleh memajukan cursor.
 - **Angka protokol:** angka remote harus dapat direpresentasikan tanpa kehilangan nilai; cast digit string ke integer bukan validasi batas.
 - **Konvergensi:** revision dan identitas perangkat adalah bagian protokol. Jangan mengganti tie-break dengan jam komputer atau mengasumsikan ID perangkat numerik selalu muat dalam integer PHP.
@@ -39,7 +41,8 @@ Pilih file test yang sesuai perubahan; contoh di atas untuk sinkronisasi. Test m
 - **Restore:** jalankan offline dengan `--confirm=RESTORE`. Sumber divalidasi lebih dulu, database aktif dibackup, hasil restore divalidasi lagi, dan kegagalan memulihkan backup pra-restore.
 - **Outbox:** backlog pending tidak dihapus untuk mengurangi ukuran. `antrian:outbox-health` memantau jumlah pending, umur tertua, dan jumlah percobaan; `antrian:outbox-prune` hanya menghapus entry tersinkron setelah retensi dan default-nya preview.
 - **Konfigurasi kantor:** jangan menghapus layanan/loket yang memiliki histori. Kode layanan adalah identitas sinkronisasi setelah tiket terbit; layanan/loket dengan pekerjaan aktif tidak boleh dinonaktifkan atau dipindahkan.
-- **Laporan:** metrik harian adalah data lokal per perangkat. Jangan menyebutnya laporan kantor gabungan sebelum server pusat dan kontrak agregasi tersedia.
+- **Laporan:** metrik harian adalah data lokal per perangkat. Jangan menyebutnya laporan kantor gabungan sebelum server pusat dan kontrak agregasi tersedia. Hitungan panggil ulang/pengembalian berasal dari audit event, bukan status akhir tiket, jadi satu tiket dapat menyumbang lebih dari sekali.
+- **Agregasi SQL:** `pluck()` dengan ekspresi `DB::raw` tidak memberi alias kolom dan menghasilkan baris tanpa properti yang diminta. Gunakan `selectRaw(... as alias)` lalu `pluck('alias_nilai', 'alias_kunci')`.
 
 ## Quality gate otomatis
 
@@ -54,6 +57,16 @@ Lulus lokal tidak membuktikan GitHub Actions lulus. Bukti CI harus diambil dari 
 - Ditambahkan coverage korespondensi audit/outbox untuk issue–call–finish dan issue–call–skip, serta pelaporan kegagalan API printer tanpa pesan sukses.
 - `composer test` kompatibel dengan Composer terpasang setelah token khusus Composer yang tidak dikenali dihapus. Gunakan Artisan langsung untuk meneruskan filter/opsi tes.
 - Verifikasi lokal: 26 tes lulus dengan 121 assertions; Pint untuk perubahan PHP, build Vite, dan validasi sintaks workflow dengan actionlint berhasil. Build masih memberi peringatan dependency opsional `fontaine`; tidak ada dependency baru yang ditambahkan.
+
+## Hasil pekerjaan pemulihan antrean 13 September 2026
+
+- Ditambahkan `recall()` dan `restore()` pada `QueueService` beserta rute, konsol loket, dan hitungan laporan. Empat retry loop yang identik digabung menjadi `withRetry()`, dan cabang kegagalan write tiket `dipanggil` menjadi `failCalledTicketWrite()`.
+- `eventTypeMatchesStatus()` sebelumnya diduplikasi di `ConflictResolver` dan `SyncService`. Keduanya adalah match non-exhaustive, sehingga case enum baru akan melempar `UnhandledMatchError` pada dua tempat. Aturannya dipindahkan ke `TicketEventType::resultingStatus()`/`matchesStatus()`.
+- Pull sinkronisasi kini memajukan `called_at` untuk event `recalled`; sebelumnya `?? ` mempertahankan waktu panggil pertama sehingga panggilan ulang dari perangkat lain tidak terlihat.
+- Bug ditemukan lewat smoke test, bukan suite: `/laporan/harian` mengembalikan 500 (`Undefined property: stdClass::$type`) karena `pluck()` memakai ekspresi `DB::raw` tanpa alias. Diganti `selectRaw(... as alias)`; regression case memproduksi 500 yang sama sebelum perbaikan.
+- Mutation check: menghapus guard `service_date`, menghapus kenaikan `revision` pada panggil ulang, memetakan `Restored` ke status salah, dan mengembalikan `pluck` lama masing-masing menggagalkan tes yang dimaksud. Tanpa tes protokol sinkronisasi yang baru, kesalahan pemetaan enum lolos tanpa terdeteksi.
+- Verifikasi lokal: 75 tes lulus dengan 297 assertions; Pint bersih; `npm run build` berhasil. Smoke test terhadap `php artisan serve` menjalankan panggil ulang dan pengembalian melalui POST sebenarnya, memastikan nomor tiket dipertahankan, `counter_id` dilepas, dan setiap audit event punya pasangan outbox.
+- Belum diverifikasi: perilaku dua perangkat nyata terhadap event `recalled`/`restored` menunggu server pusat, dan pengumuman suara/tampilan TV tidak termasuk scope aplikasi desktop ini.
 
 ## Keputusan gaya yang tetap ditunda
 

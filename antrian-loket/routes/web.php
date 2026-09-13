@@ -17,6 +17,8 @@ Route::get('/loket/{counter}', [CounterController::class, 'show'])->name('loket.
 Route::post('/loket/{counter}/panggil', [CounterController::class, 'callNext'])->name('loket.panggil');
 Route::post('/loket/{counter}/selesai/{ticket}', [CounterController::class, 'finish'])->name('loket.selesai');
 Route::post('/loket/{counter}/lewati/{ticket}', [CounterController::class, 'skip'])->name('loket.lewati');
+Route::post('/loket/{counter}/panggil-ulang/{ticket}', [CounterController::class, 'recall'])->name('loket.panggil-ulang');
+Route::post('/loket/{counter}/kembalikan/{ticket}', [CounterController::class, 'restore'])->name('loket.kembalikan');
 
 // Ambil tiket baru untuk sebuah layanan (meja tamu / walk-in).
 Route::post('/layanan/{service}/ambil', [CounterController::class, 'issue'])->name('tiket.ambil');

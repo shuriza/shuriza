@@ -17,13 +17,15 @@
         </form>
     </div>
 
-    <section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         @foreach ([
             ['Terbit', $issuedCount, 'text-slate-100'],
             ['Menunggu', $waitingCount, 'text-amber-300'],
             ['Dipanggil', $calledCount, 'text-sky-300'],
             ['Selesai', $finishedCount, 'text-emerald-300'],
             ['Dilewati', $skippedCount, 'text-rose-300'],
+            ['Panggil ulang', $recalledCount, 'text-sky-300'],
+            ['Dikembalikan', $restoredCount, 'text-amber-300'],
         ] as [$label, $value, $color])
             <div class="rounded-2xl border border-slate-700 bg-slate-900 p-5">
                 <p class="text-sm text-slate-400">{{ $label }}</p>
@@ -31,6 +33,10 @@
             </div>
         @endforeach
     </section>
+
+    <p class="mt-4 text-sm text-slate-500">
+        Panggil ulang dan pengembalian dihitung dari audit event, jadi satu tiket dapat menyumbang lebih dari sekali.
+    </p>
 
     <section class="mt-8 overflow-hidden rounded-2xl border border-slate-700 bg-slate-900">
         <div class="overflow-x-auto">
@@ -43,6 +49,8 @@
                         <th class="px-5 py-4 text-right">Dipanggil</th>
                         <th class="px-5 py-4 text-right">Selesai</th>
                         <th class="px-5 py-4 text-right">Dilewati</th>
+                        <th class="px-5 py-4 text-right">Panggil ulang</th>
+                        <th class="px-5 py-4 text-right">Dikembalikan</th>
                         <th class="px-5 py-4 text-right">Rata-rata tunggu</th>
                         <th class="px-5 py-4 text-right">Rata-rata layanan</th>
                     </tr>
@@ -56,6 +64,8 @@
                             <td class="px-5 py-4 text-right">{{ $service->called_count }}</td>
                             <td class="px-5 py-4 text-right">{{ $service->finished_count }}</td>
                             <td class="px-5 py-4 text-right">{{ $service->skipped_count }}</td>
+                            <td class="px-5 py-4 text-right">{{ $service->recalled_count }}</td>
+                            <td class="px-5 py-4 text-right">{{ $service->restored_count }}</td>
                             <td class="px-5 py-4 text-right">{{ $service->average_wait_minutes === null ? '—' : number_format((float) $service->average_wait_minutes, 1).' mnt' }}</td>
                             <td class="px-5 py-4 text-right">{{ $service->average_service_minutes === null ? '—' : number_format((float) $service->average_service_minutes, 1).' mnt' }}</td>
                         </tr>
