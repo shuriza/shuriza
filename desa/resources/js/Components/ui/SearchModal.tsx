@@ -1,13 +1,22 @@
 import { router } from '@inertiajs/react';
 import axios from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Calendar, Image as ImageIcon, MapPin, Search, X, Loader2 } from 'lucide-react';
+import {
+    Calendar,
+    Image as ImageIcon,
+    MapPin,
+    Megaphone,
+    Search,
+    Store,
+    X,
+    Loader2,
+} from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 interface SearchResult {
     id: number;
     title: string;
-    type: 'event' | 'kenangan' | 'destinasi';
+    type: 'event' | 'kenangan' | 'destinasi' | 'berita' | 'umkm';
     url: string;
     excerpt?: string;
 }
@@ -32,6 +41,16 @@ const typeConfig = {
         label: 'Destinasi',
         color: 'text-brand-strong bg-brand-soft',
         icon: MapPin,
+    },
+    berita: {
+        label: 'Berita',
+        color: 'text-blue-700 bg-blue-50',
+        icon: Megaphone,
+    },
+    umkm: {
+        label: 'UMKM',
+        color: 'text-accent-strong bg-accent-soft',
+        icon: Store,
     },
 } as const;
 
@@ -63,7 +82,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             const response = await axios.get('/api/search', {
                 params: { q: searchQuery },
             });
-            setResults(response.data.results || []);
+            // Defensive: a non-array payload here previously crashed the whole React tree.
+            const payload = response.data?.results;
+            setResults(Array.isArray(payload) ? payload : []);
             setActiveIndex(0);
         } catch {
             setResults([]);
@@ -132,7 +153,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         value={query}
                         onChange={(e) => handleInputChange(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Cari acara, kenangan, destinasi..."
+                        placeholder="Cari berita, acara, kenangan, destinasi, UMKM..."
                         className="flex-1 text-base text-ink-1 placeholder-ink-4 bg-transparent border-none outline-none focus:ring-0"
                     />
                     <kbd className="hidden sm:inline-flex items-center px-2 py-1 text-xs font-medium text-ink-3 bg-surface-3 rounded-md">
@@ -179,6 +200,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         <div className="py-2">
                             {Object.entries(groupedResults).map(([type, items]) => {
                                 const config = typeConfig[type as keyof typeof typeConfig];
+                                if (!config) return null;
                                 const TypeIcon = config.icon;
                                 return (
                                     <div key={type}>

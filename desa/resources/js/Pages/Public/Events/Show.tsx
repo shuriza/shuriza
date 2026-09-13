@@ -1,6 +1,21 @@
 import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 import ShareButton from '@/Components/ui/ShareButton';
+import LikeButton from '@/Components/ui/LikeButton';
+import CommentSection from '@/Components/ui/CommentSection';
+
+interface EventComment {
+    id: number;
+    user: { id: number; name: string };
+    content: string;
+    created_at: string;
+}
+
+interface EventCategory {
+    id: number;
+    name: string;
+    slug: string;
+}
 
 interface Event {
     id: number;
@@ -11,8 +26,11 @@ interface Event {
     event_date: string;
     event_time: string | null;
     location: string;
-    category: string;
+    category: EventCategory | null;
     image: string | null;
+    likes_count: number;
+    is_liked: boolean;
+    comments: EventComment[];
 }
 
 interface RelatedEvent {
@@ -21,7 +39,7 @@ interface RelatedEvent {
     slug: string;
     event_date: string;
     location: string;
-    category: string;
+    category: EventCategory | null;
     image: string | null;
 }
 
@@ -39,7 +57,7 @@ function formatDate(dateString: string): string {
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-function getCategoryBadgeColor(category: string): string {
+function getCategoryBadgeColor(category?: string | null): string {
     switch (category?.toLowerCase()) {
         case 'budaya': return 'bg-purple-100 text-purple-700';
         case 'keagamaan': return 'bg-amber-100 text-amber-700';
@@ -81,9 +99,11 @@ export default function EventShow({ event, relatedEvents }: EventShowProps) {
                         Kembali ke Acara
                     </Link>
                     <div className="flex items-center gap-3 mb-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryBadgeColor(event.category)}`}>
-                            {event.category}
-                        </span>
+                        {event.category && (
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryBadgeColor(event.category.name)}`}>
+                                {event.category.name}
+                            </span>
+                        )}
                     </div>
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight max-w-4xl">
                         {event.title}
@@ -167,6 +187,24 @@ export default function EventShow({ event, relatedEvents }: EventShowProps) {
                                 <div dangerouslySetInnerHTML={{ __html: event.content }} />
                             </div>
                         </div>
+
+                        <div className="mt-8 flex flex-wrap items-center gap-3">
+                            <LikeButton
+                                likeable_type="event"
+                                likeable_id={event.id}
+                                initial_count={event.likes_count ?? 0}
+                                is_liked={event.is_liked ?? false}
+                            />
+                            <ShareButton title={event.title} url={`/acara/${event.slug}`} />
+                        </div>
+
+                        <div className="mt-10 bg-surface-1 rounded-2xl shadow-sm border border-line p-6 md:p-8">
+                            <CommentSection
+                                comments={event.comments ?? []}
+                                commentable_type="event"
+                                commentable_id={event.id}
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
@@ -197,9 +235,11 @@ export default function EventShow({ event, relatedEvents }: EventShowProps) {
                                         </div>
                                     )}
                                     <div className="p-5">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryBadgeColor(related.category)}`}>
-                                            {related.category}
-                                        </span>
+                                        {related.category && (
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryBadgeColor(related.category.name)}`}>
+                                                {related.category.name}
+                                            </span>
+                                        )}
                                         <h4 className="font-semibold text-white group-hover:text-emerald-200 transition-colors mt-3 mb-2 line-clamp-2">
                                             {related.title}
                                         </h4>

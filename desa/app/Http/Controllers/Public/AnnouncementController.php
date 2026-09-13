@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,22 +23,35 @@ class AnnouncementController extends Controller
         ]);
     }
 
-    public function show(string $slug): Response
+    public function show(Request $request, string $slug): Response
     {
         $announcement = Announcement::published()
             ->where('slug', $slug)
             ->with('user:id,name')
             ->firstOrFail();
 
-        $related = Announcement::published()
-            ->where('id', '!=', $announcement->id)
-            ->latest('published_at')
-            ->take(3)
-            ->get();
+        $userId = $request->user()?->id;
+
+        // The page renders a like button and comment thread, so both must be primed here.
+        $announcement->setAttribute('likes_count', $announcement->likes()->count());
+        $announcement->setAttribute('is_liked', $announcement->isLikedBy($userId));
+        $announcement->setAttribute('comments', $announcement->activeComments()->get()->map(fn ($comment) => [
+            'id' => $comment->id,
+            'content' => $comment->content,
+            'created_at' => $comment->created_at,
+            'user' => [
+                'id' => $comment->user_id,
+                'name' => $comment->user?->name ?? 'Warga Desa Muneng',
+            ],
+        ]));
 
         return Inertia::render('Public/Announcements/Show', [
             'announcement' => $announcement,
-            'related' => $related,
+            'relatedAnnouncements' => Announcement::published()
+                ->whereKeyNot($announcement->id)
+                ->latest('published_at')
+                ->take(3)
+                ->get(['id', 'title', 'slug', 'image', 'published_at', 'excerpt']),
         ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,7 +12,7 @@ class CommentController extends Controller
 {
     public function index(string $type, int $id): JsonResponse
     {
-        $commentableType = $this->resolveModelClass($type);
+        $commentableType = $this->resolveMorphAlias($type);
 
         $comments = Comment::where('commentable_type', $commentableType)
             ->where('commentable_id', $id)
@@ -33,7 +34,7 @@ class CommentController extends Controller
 
         $comment = Comment::create([
             'user_id' => $request->user()->id,
-            'commentable_type' => $this->resolveModelClass($request->input('commentable_type')),
+            'commentable_type' => $this->resolveMorphAlias($request->input('commentable_type')),
             'commentable_id' => $request->input('commentable_id'),
             'content' => $request->input('content'),
             'status' => 'active',
@@ -60,14 +61,17 @@ class CommentController extends Controller
         return response()->json(['message' => 'Komentar berhasil dihapus.']);
     }
 
-    private function resolveModelClass(string $type): string
+    /**
+     * `*_type` columns hold the morph alias registered in AppServiceProvider, not a
+     * fully-qualified class name. Validate against that map so an unknown type is a
+     * hard error rather than a query that silently matches nothing.
+     */
+    private function resolveMorphAlias(string $type): string
     {
-        return match ($type) {
-            'event' => \App\Models\Event::class,
-            'memory' => \App\Models\Memory::class,
-            'destination' => \App\Models\Destination::class,
-            'announcement' => \App\Models\Announcement::class,
-            default => throw new \InvalidArgumentException("Invalid commentable type: {$type}"),
-        };
+        if (! array_key_exists($type, Relation::morphMap())) {
+            throw new \InvalidArgumentException("Invalid commentable type: {$type}");
+        }
+
+        return $type;
     }
 }

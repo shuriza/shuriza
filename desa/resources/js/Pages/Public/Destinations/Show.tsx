@@ -1,11 +1,21 @@
 import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import LikeButton from '@/Components/ui/LikeButton';
+import CommentSection from '@/Components/ui/CommentSection';
+import ShareButton from '@/Components/ui/ShareButton';
 import { useState } from 'react';
 
 interface DestinationImage {
     id: number;
     url: string;
     caption: string | null;
+}
+
+interface DestinationComment {
+    id: number;
+    user: { id: number; name: string };
+    content: string;
+    created_at: string;
 }
 
 interface Destination {
@@ -18,6 +28,9 @@ interface Destination {
     address: string | null;
     featured_image: string | null;
     images: DestinationImage[];
+    likes_count: number;
+    is_liked: boolean;
+    comments: DestinationComment[];
 }
 
 interface RelatedDestination {
@@ -170,6 +183,27 @@ export default function DestinationShow({ destination, relatedDestinations }: De
                                         <div dangerouslySetInnerHTML={{ __html: destination.content }} />
                                     </div>
                                 )}
+
+                                <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-line pt-6">
+                                    <LikeButton
+                                        likeable_type="destination"
+                                        likeable_id={destination.id}
+                                        initial_count={destination.likes_count ?? 0}
+                                        is_liked={destination.is_liked ?? false}
+                                    />
+                                    <ShareButton
+                                        title={destination.name}
+                                        url={`/destinasi/${destination.slug}`}
+                                    />
+                                </div>
+
+                                <div className="mt-8 border-t border-line pt-8">
+                                    <CommentSection
+                                        comments={destination.comments ?? []}
+                                        commentable_type="destination"
+                                        commentable_id={destination.id}
+                                    />
+                                </div>
                             </div>
                         </div>
 

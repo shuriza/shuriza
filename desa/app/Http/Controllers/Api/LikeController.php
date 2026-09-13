@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Like;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class LikeController extends Controller
         ]);
 
         $userId = $request->user()->id;
-        $likeableType = $this->resolveModelClass($request->input('likeable_type'));
+        $likeableType = $this->resolveMorphAlias($request->input('likeable_type'));
         $likeableId = $request->input('likeable_id');
 
         $existing = Like::where('user_id', $userId)
@@ -47,14 +48,15 @@ class LikeController extends Controller
         ]);
     }
 
-    private function resolveModelClass(string $type): string
+    /**
+     * `*_type` columns hold the morph alias registered in AppServiceProvider.
+     */
+    private function resolveMorphAlias(string $type): string
     {
-        return match ($type) {
-            'event' => \App\Models\Event::class,
-            'memory' => \App\Models\Memory::class,
-            'destination' => \App\Models\Destination::class,
-            'announcement' => \App\Models\Announcement::class,
-            default => throw new \InvalidArgumentException("Invalid likeable type: {$type}"),
-        };
+        if (! array_key_exists($type, Relation::morphMap())) {
+            throw new \InvalidArgumentException("Invalid likeable type: {$type}");
+        }
+
+        return $type;
     }
 }

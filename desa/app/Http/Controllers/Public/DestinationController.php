@@ -26,12 +26,24 @@ class DestinationController extends Controller
         ]);
     }
 
-    public function show(string $slug): Response
+    public function show(Request $request, string $slug): Response
     {
         $destination = Destination::where('slug', $slug)
             ->published()
             ->with('images')
             ->firstOrFail();
+
+        $destination->setAttribute('likes_count', $destination->likes()->count());
+        $destination->setAttribute('is_liked', $destination->isLikedBy($request->user()?->id));
+        $destination->setAttribute('comments', $destination->activeComments()->get()->map(fn ($comment) => [
+            'id' => $comment->id,
+            'content' => $comment->content,
+            'created_at' => $comment->created_at,
+            'user' => [
+                'id' => $comment->user_id,
+                'name' => $comment->user?->name ?? 'Warga Desa Muneng',
+            ],
+        ]));
 
         $relatedDestinations = Destination::published()
             ->where('id', '!=', $destination->id)

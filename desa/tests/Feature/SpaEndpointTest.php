@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Memory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Tests\TestCase;
 
 class SpaEndpointTest extends TestCase
@@ -35,11 +36,51 @@ class SpaEndpointTest extends TestCase
 
         // Reactions are scoped to the visitor's session rather than an account.
         $this->assertDatabaseHas('reactions', [
-            'reactable_type' => Memory::class,
+            'reactable_type' => 'memory',
             'reactable_id' => $memory->id,
             'emoji' => 'heart',
             'user_id' => null,
         ]);
+    }
+
+    /**
+     * `*_type` columns must hold the short morph alias, not a fully-qualified class name,
+     * so the data survives a namespace or class rename.
+     */
+    public function test_polymorphic_columns_store_morph_aliases(): void
+    {
+        $memory = Memory::factory()->create();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->postJson('/api/likes/toggle', [
+            'likeable_type' => 'memory',
+            'likeable_id' => $memory->id,
+        ])->assertOk();
+
+        $this->actingAs($user)->postJson('/api/comments', [
+            'commentable_type' => 'memory',
+            'commentable_id' => $memory->id,
+            'content' => 'Kenangan yang indah.',
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('likes', ['likeable_type' => 'memory']);
+        $this->assertDatabaseHas('comments', ['commentable_type' => 'memory']);
+        $this->assertSame(Memory::class, Relation::getMorphedModel('memory'));
+
+        // The relation must still resolve back to a real model.
+        $this->assertTrue($memory->comments()->exists());
+        $this->assertSame(1, $memory->likes()->count());
+    }
+
+    public function test_an_unmapped_morph_type_is_rejected(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->postJson('/api/comments', [
+            'commentable_type' => 'product',
+            'commentable_id' => 1,
+            'content' => 'Tidak didukung.',
+        ])->assertUnprocessable();
     }
 
     public function test_reaction_toggle_rejects_an_unsupported_emoji(): void
@@ -85,7 +126,7 @@ class SpaEndpointTest extends TestCase
 
         $comment = Comment::create([
             'user_id' => $author->id,
-            'commentable_type' => Memory::class,
+            'commentable_type' => 'memory',
             'commentable_id' => $memory->id,
             'content' => 'Kenangan yang indah.',
             'status' => 'active',
@@ -106,7 +147,7 @@ class SpaEndpointTest extends TestCase
 
         $comment = Comment::create([
             'user_id' => $author->id,
-            'commentable_type' => Memory::class,
+            'commentable_type' => 'memory',
             'commentable_id' => $memory->id,
             'content' => 'Kenangan yang indah.',
             'status' => 'active',

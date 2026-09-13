@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\VillageInfoController;
 use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Admin\PollController as AdminPollController;
 use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
+use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\Public\ProductController;
 use App\Http\Controllers\Public\MapController;
 use App\Http\Controllers\Public\UserDashboardController;
@@ -173,6 +174,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/contacts/{contactMessage}/read', [AdminContactMessageController::class, 'markRead'])->name('contacts.read');
     Route::post('/contacts/{contactMessage}/archive', [AdminContactMessageController::class, 'archive'])->name('contacts.archive');
     Route::delete('/contacts/{contactMessage}', [AdminContactMessageController::class, 'destroy'])->name('contacts.destroy');
+
+    // Comment moderation
+    Route::get('/comments', [AdminCommentController::class, 'index'])->name('comments.index');
+    Route::post('/comments/{comment}/hide', [AdminCommentController::class, 'hide'])->name('comments.hide');
+    Route::post('/comments/{comment}/restore', [AdminCommentController::class, 'restore'])->name('comments.restore');
+    Route::delete('/comments/{comment}', [AdminCommentController::class, 'destroy'])->name('comments.destroy');
 });
 
 require __DIR__.'/auth.php';
