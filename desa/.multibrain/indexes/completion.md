@@ -39,3 +39,34 @@ the missing contact-message feature, and modernization of the admin/auth surface
 - Replace the hotlinked Unsplash hero with an original optimized photograph of Desa Muneng.
 - `telepon` / `email` village info are intentionally seeded empty — fill via admin once official channels exist.
 - `polls.votes` JSON column and `memories.category_id` remain unused; `Destination.category` is a varchar enum, so the `type='destination'` rows in `categories` are dead data.
+
+## Stage 2 (next-development pass)
+
+### Crash-class bugs — blank page with HTTP 200
+Route-level smoke checks cannot catch these; only a browser can. Always open the page.
+
+- `/api/search` returned collections keyed by domain, but `SearchModal` renders a flat
+  pre-grouped list → `results.reduce is not a function` unmounted the whole React tree.
+- Every `/berita/{slug}` was blank: controller sent `related` (page reads
+  `relatedAnnouncements`) and omitted `likes_count` / `is_liked` / `comments`.
+- Every `/acara/{slug}` was blank: `category` is an eager-loaded relation object, but the
+  page called `.toLowerCase()` on it.
+
+### Decisions
+- Search hits are self-describing: each carries `type` + ready-to-visit `url`. Coverage
+  extended to Berita and UMKM. Excerpts pass through `strip_tags`.
+- `Relation::enforceMorphMap` registered in `AppServiceProvider`. `*_type` columns store
+  short aliases; controllers validate against `Relation::morphMap()` instead of building
+  FQCNs. A migration rewrote legacy rows.
+- Comment moderation lives at `/admin/comments`. The polymorphic subject is flattened
+  server-side (label + title + url) rather than teaching the page about four models.
+- `SearchModal` now ignores non-array payloads and unknown result types defensively.
+
+### Traits were missing where pages assumed them
+`Announcement` and `Destination` lacked `Likeable`/`Commentable` even though their detail
+pages rendered like buttons and comment threads. Check the trait before wiring UI.
+
+### Verification
+60 tests / 289 assertions (was 49). Browser-confirmed: search returns grouped results,
+all four detail pages render comment threads, moderation queue shows correct labels.
+0 FQCN rows remain in any polymorphic column.
