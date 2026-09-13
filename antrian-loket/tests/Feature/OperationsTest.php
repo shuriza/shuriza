@@ -13,6 +13,8 @@ class OperationsTest extends TestCase
 
     public function test_operator_can_view_outbox_health_and_recent_failure(): void
     {
+        $this->withoutVite();
+
         OutboxEntry::query()->forceCreate([
             'event_uuid' => 'event-failed',
             'type' => 'issued',
