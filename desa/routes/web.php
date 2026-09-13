@@ -108,8 +108,14 @@ Route::prefix('api')->name('api.')->group(function () {
     });
 });
 
-// Authenticated Warga Routes
-Route::middleware(['auth', 'verified'])->group(function () {
+// Authenticated Warga Routes.
+//
+// No `verified` middleware on purpose: `User` does not implement `MustVerifyEmail`, so the
+// middleware was a silent no-op that only implied protection. Requiring verification for
+// real would also lock villagers out of submitting kenangan, since the project runs with
+// MAIL_MAILER=log and has no outbound mail channel. Breeze's verification routes remain
+// available for the day a mailer is configured.
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard-saya', [UserDashboardController::class, 'index'])->name('user.dashboard');
 
     Route::get('/kenangan/submit', [MemoryController::class, 'create'])->name('memories.create');
