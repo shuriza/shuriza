@@ -13,12 +13,12 @@ class ContactController extends Controller
 {
     public function index(): Response
     {
-        $address = VillageInfo::getValue('alamat', 'Desa Muneng, Kec. Purwoasri, Kab. Kediri, Jawa Timur');
-        $coordinates = VillageInfo::getValue('koordinat', '-7.6298, 112.0527');
-
         return Inertia::render('Public/Contact', [
-            'address' => $address,
-            'coordinates' => $coordinates,
+            // The page looks values up by key via `villageInfo.find(...)`, so hand it the
+            // contact rows rather than pre-picked scalars.
+            'villageInfo' => VillageInfo::query()
+                ->whereIn('key', ['alamat', 'telepon', 'email', 'jam_kerja', 'koordinat'])
+                ->get(['key', 'value', 'label']),
         ]);
     }
 

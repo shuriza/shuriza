@@ -12,14 +12,19 @@ class AnnouncementController extends Controller
 {
     public function index(): Response
     {
-        $announcements = Announcement::published()
-            ->with('user:id,name')
-            ->orderByDesc('is_pinned')
-            ->latest('published_at')
-            ->paginate(12);
-
         return Inertia::render('Public/Announcements/Index', [
-            'announcements' => $announcements,
+            'announcements' => Announcement::published()
+                ->with('user:id,name')
+                ->orderByDesc('is_pinned')
+                ->latest('published_at')
+                ->paginate(12),
+            // The page renders a dedicated "disematkan" band above the list.
+            'pinned' => Announcement::published()
+                ->pinned()
+                ->with('user:id,name')
+                ->latest('published_at')
+                ->take(3)
+                ->get(),
         ]);
     }
 

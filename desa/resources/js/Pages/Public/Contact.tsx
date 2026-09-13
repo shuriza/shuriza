@@ -12,6 +12,9 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
         email: '',
         subject: '',
         message: '',
+        // Honeypot: hidden from real users, so any value means a bot filled it.
+        // The server rejects the request when this is present.
+        website: '',
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -34,7 +37,7 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
 
     const getInfoValue = (key: string): string => {
         const item = villageInfo.find((i) => i.key === key);
-        return item?.value || '-';
+        return item?.value?.trim() ?? '';
     };
 
     const faqs = [
@@ -133,6 +136,22 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                             )}
 
                             <form onSubmit={handleSubmit} className="bg-surface-1 rounded-2xl border border-line shadow-sm p-6 space-y-5">
+                                {/*
+                                  Honeypot. Hidden from sighted users, screen readers and the
+                                  tab order, so only automated submissions fill it. The server
+                                  rejects the request when it carries a value; an empty string
+                                  passes `prohibited`, which is what real visitors send.
+                                */}
+                                <input
+                                    type="text"
+                                    name="website"
+                                    value={data.website}
+                                    onChange={(e) => setData('website', e.target.value)}
+                                    className="hidden"
+                                    tabIndex={-1}
+                                    autoComplete="off"
+                                    aria-hidden="true"
+                                />
                                 <div>
                                     <label htmlFor="name" className="block text-sm font-medium text-ink-2 mb-1.5">
                                         Nama Lengkap <span className="text-red-500">*</span>
@@ -271,7 +290,8 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                                         </div>
                                         <h3 className="text-sm font-medium text-emerald-200 mb-1">Alamat</h3>
                                         <p className="text-white font-semibold text-sm leading-relaxed">
-                                            Desa Muneng, Kec. Purwoasri, Kab. Kediri, Jawa Timur 64154
+                                            {getInfoValue('alamat') ||
+                                                'Desa Muneng, Kec. Purwoasri, Kab. Kediri, Jawa Timur 64154'}
                                         </p>
                                     </div>
                                 </div>
@@ -287,9 +307,18 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                                             </svg>
                                         </div>
                                         <h3 className="text-sm font-medium text-teal-200 mb-1">Telepon</h3>
-                                        <p className="text-white font-semibold text-sm">
-                                            {getInfoValue('telepon')}
-                                        </p>
+                                        {getInfoValue('telepon') ? (
+                                            <a
+                                                href={`tel:${getInfoValue('telepon').replace(/\s+/g, '')}`}
+                                                className="text-white font-semibold text-sm underline decoration-white/40 hover:decoration-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-900"
+                                            >
+                                                {getInfoValue('telepon')}
+                                            </a>
+                                        ) : (
+                                            <p className="text-sm text-teal-100/80">
+                                                Belum tersedia — silakan datang ke kantor desa.
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -304,9 +333,18 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                                             </svg>
                                         </div>
                                         <h3 className="text-sm font-medium text-cyan-200 mb-1">Email</h3>
-                                        <p className="text-white font-semibold text-sm">
-                                            {getInfoValue('email')}
-                                        </p>
+                                        {getInfoValue('email') ? (
+                                            <a
+                                                href={`mailto:${getInfoValue('email')}`}
+                                                className="text-white font-semibold text-sm underline decoration-white/40 hover:decoration-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-cyan-900"
+                                            >
+                                                {getInfoValue('email')}
+                                            </a>
+                                        ) : (
+                                            <p className="text-sm text-cyan-100/80">
+                                                Belum tersedia — gunakan formulir di samping.
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -322,7 +360,15 @@ export default function Contact({ villageInfo = [] }: ContactProps) {
                                         </div>
                                         <h3 className="text-sm font-medium text-emerald-200 mb-1">Jam Kerja</h3>
                                         <p className="text-white font-semibold text-sm">
-                                            Senin - Jumat<br />08.00 - 15.00 WIB
+                                            {getInfoValue('jam_kerja')
+                                                ? getInfoValue('jam_kerja')
+                                                      .split('\n')
+                                                      .map((line) => (
+                                                          <span key={line} className="block">
+                                                              {line}
+                                                          </span>
+                                                      ))
+                                                : 'Senin - Jumat, 08.00 - 15.00 WIB'}
                                         </p>
                                     </div>
                                 </div>
