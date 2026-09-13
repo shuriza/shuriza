@@ -15,6 +15,7 @@ Aplikasi desktop lokal untuk petugas loket pelayanan publik. Dibangun dengan Lar
 | Backup dan kesehatan outbox | Tersedia | Restore tetap manual dan dilakukan ketika aplikasi ditutup |
 | Pengaturan layanan dan loket | Tersedia | Tidak menghapus histori; perubahan berisiko ditolak ketika antrean masih aktif |
 | Laporan harian lokal | Tersedia | Berdasarkan database perangkat ini, bukan agregat lintas perangkat |
+| Riwayat/jejak audit tiket | Tersedia | Hanya baca; hanya event yang tersimpan di database perangkat ini |
 | Installer internal Windows x64 | Pernah berhasil dibangun | Source aplikasi masih terekspos pada build tanpa secure bundle |
 | Distribusi publik | Diblokir release gate | Memerlukan secure bundle Bifrost dan code signing Windows |
 
@@ -42,6 +43,7 @@ Petugas loket pelayanan publik, dengan contoh layanan perizinan, legalisasi, dan
 - Validasi backup, restore offline dengan backup pra-restore, dan retensi aman untuk outbox yang sudah tersinkron.
 - Pengaturan lokal untuk menambah/mengubah layanan, estimasi, loket, petugas, serta status aktif/buka tanpa menghapus histori.
 - Laporan harian per layanan: tiket terbit, status, jumlah panggil ulang/pengembalian, rata-rata waktu tunggu, dan rata-rata waktu pelayanan.
+- Riwayat tiket: cari per tanggal layanan berdasarkan label/nomor, lalu lihat urutan peristiwa beserta revisi, perangkat asal, dan status pengiriman tiap event.
 - Release gate yang menolak distribusi publik tanpa secure bundle, production config, identitas/versi aplikasi, dan code signing.
 
 ## Kenapa native, bukan web biasa?
@@ -158,7 +160,7 @@ npm ci --ignore-scripts
 npm run build
 ```
 
-Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **75 tes dan 297 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
+Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **82 tes dan 325 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
 
 Konvensi tim tersedia di `.ai/rules/index.md`. Alur review, invariant yang wajib dijaga, konflik gaya yang ditunda, dan acceptance rilis berikutnya dijelaskan dalam [panduan kualitas dan roadmap](docs/quality-roadmap.md).
 
@@ -226,6 +228,22 @@ Guard yang berlaku:
 - tiket yang belum dilewati (masih menunggu, dipanggil, atau sudah selesai) ditolak.
 
 Panggil ulang dan pengembalian dicatat sebagai event audit `recalled` dan `restored` beserta pasangan outbox-nya, dan dihitung terpisah pada laporan harian. Satu tiket dapat menyumbang lebih dari satu panggil ulang, jadi angka ini bukan jumlah tiket unik.
+
+## Riwayat dan jejak audit tiket
+
+Menu **Riwayat** menjawab pertanyaan operator "tiket ini tadi kenapa?". Halaman ini hanya membaca; tidak ada aksi antrean di dalamnya.
+
+- Pencarian dibatasi satu tanggal layanan. Label dicocokkan sebagian, jadi mengetik `42` menemukan `A042`; nomor dicocokkan tepat hanya ketika input berupa angka.
+- Hasil dibatasi 25 tiket pertama agar tanggal yang padat tidak memuat seluruh tabel.
+- Halaman jejak menampilkan urutan peristiwa menurut waktu kejadian, beserta `revision`, perangkat asal, dan loket pada tiap event.
+
+Status pengiriman tiap event dibaca dari outbox dan dibedakan menjadi tiga:
+
+- **Terkirim** — baris outbox sudah punya `synced_at`.
+- **Gagal kirim** — masih pending dan memiliki `last_error`; jumlah percobaan ditampilkan.
+- **Menunggu dikirim** — pending tanpa error.
+
+Event yang **tidak** memiliki baris outbox ditandai **Diterima dari pusat**. Itu perilaku benar, bukan data hilang: event hasil import sengaja tidak menghasilkan outbox echo. Durasi tunggu dan layanan dihitung dari tiket ini saja, bukan rata-rata layanan.
 
 ## Batas penggunaan multi-perangkat dan rilis
 

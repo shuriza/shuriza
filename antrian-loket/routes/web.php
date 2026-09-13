@@ -4,6 +4,7 @@ use App\Http\Controllers\CounterController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\OfficeConfigurationController;
 use App\Http\Controllers\OperationsController;
+use App\Http\Controllers\TicketHistoryController;
 use App\Http\Controllers\TicketPrintController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,3 +41,7 @@ Route::post('/pengaturan/loket', [OfficeConfigurationController::class, 'storeCo
 Route::post('/pengaturan/loket/{counter}', [OfficeConfigurationController::class, 'updateCounter'])->name('pengaturan.loket.perbarui');
 
 Route::get('/laporan/harian', [DailyReportController::class, 'index'])->name('laporan.harian');
+
+// Jejak audit tiket — hanya baca, tidak ada mutasi antrean.
+Route::get('/riwayat', [TicketHistoryController::class, 'index'])->name('riwayat.index');
+Route::get('/riwayat/{ticket}', [TicketHistoryController::class, 'show'])->name('riwayat.show');

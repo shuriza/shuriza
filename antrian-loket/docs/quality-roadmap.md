@@ -43,6 +43,8 @@ Pilih file test yang sesuai perubahan; contoh di atas untuk sinkronisasi. Test m
 - **Konfigurasi kantor:** jangan menghapus layanan/loket yang memiliki histori. Kode layanan adalah identitas sinkronisasi setelah tiket terbit; layanan/loket dengan pekerjaan aktif tidak boleh dinonaktifkan atau dipindahkan.
 - **Laporan:** metrik harian adalah data lokal per perangkat. Jangan menyebutnya laporan kantor gabungan sebelum server pusat dan kontrak agregasi tersedia. Hitungan panggil ulang/pengembalian berasal dari audit event, bukan status akhir tiket, jadi satu tiket dapat menyumbang lebih dari sekali.
 - **Agregasi SQL:** `pluck()` dengan ekspresi `DB::raw` tidak memberi alias kolom dan menghasilkan baris tanpa properti yang diminta. Gunakan `selectRaw(... as alias)` lalu `pluck('alias_nilai', 'alias_kunci')`.
+- **Riwayat tiket:** halaman jejak hanya membaca. Event tanpa baris outbox berarti hasil import dari pusat, bukan data hilang; jangan menampilkannya sebagai pending atau membuat outbox echo untuk melengkapinya.
+- **Assertion halaman:** jangan membuktikan hasil pencarian dengan `assertSee` pada label tiket. Teks placeholder/contoh pada form dapat meloloskan assertion tanpa hasil apa pun; periksa `viewData` atau baris tabel.
 
 ## Quality gate otomatis
 
@@ -67,6 +69,15 @@ Lulus lokal tidak membuktikan GitHub Actions lulus. Bukti CI harus diambil dari 
 - Mutation check: menghapus guard `service_date`, menghapus kenaikan `revision` pada panggil ulang, memetakan `Restored` ke status salah, dan mengembalikan `pluck` lama masing-masing menggagalkan tes yang dimaksud. Tanpa tes protokol sinkronisasi yang baru, kesalahan pemetaan enum lolos tanpa terdeteksi.
 - Verifikasi lokal: 75 tes lulus dengan 297 assertions; Pint bersih; `npm run build` berhasil. Smoke test terhadap `php artisan serve` menjalankan panggil ulang dan pengembalian melalui POST sebenarnya, memastikan nomor tiket dipertahankan, `counter_id` dilepas, dan setiap audit event punya pasangan outbox.
 - Belum diverifikasi: perilaku dua perangkat nyata terhadap event `recalled`/`restored` menunggu server pusat, dan pengumuman suara/tampilan TV tidak termasuk scope aplikasi desktop ini.
+
+## Hasil pekerjaan riwayat tiket 13 September 2026
+
+- `ticket_events` sebelumnya ditulis pada setiap mutasi tetapi tidak pernah dibaca kecuali sebagai agregat pada laporan. `TicketHistoryController` menambahkan pencarian per tanggal dan halaman jejak per tiket; keduanya read-only.
+- Status pengiriman per event dibaca dari outbox dan dibedakan terkirim/gagal/menunggu. Event tanpa baris outbox ditandai berasal dari pusat, sesuai desain `recordImported()` yang sengaja tidak membuat outbox echo.
+- Bug pada tes, bukan produksi: placeholder form berisi contoh `A042`, sehingga `assertSee('A042')` lulus tanpa hasil pencarian apa pun. Tes diubah memeriksa `viewData('tickets')`. Aturannya dicatat pada daftar invariant.
+- Mutation check: menghapus cabang event-import membuat tes gagal, dan mengganti urutan timeline menjadi `orderByDesc('id')` juga gagal. Keduanya kembali lulus setelah sumber dipulihkan.
+- Verifikasi lokal: 82 tes lulus dengan 325 assertions; Pint bersih; `npm run build` berhasil. Smoke test terhadap `php artisan serve` memastikan pencarian `q=1` menemukan tiket yang benar, timeline memuat empat event berurutan, dan ketiga badge status pengiriman muncul.
+- Belum diverifikasi: tampilan jejak untuk event yang benar-benar berasal dari server pusat menunggu server tersebut tersedia; yang diuji sekarang adalah jalur `recordImported()`.
 
 ## Keputusan gaya yang tetap ditunda
 

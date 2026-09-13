@@ -19,6 +19,7 @@
                 <nav class="flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
                     <a href="{{ route('operasional.index') }}" class="text-slate-300 transition hover:text-emerald-300">Operasional</a>
                     <a href="{{ route('laporan.harian') }}" class="text-slate-300 transition hover:text-emerald-300">Laporan</a>
+                    <a href="{{ route('riwayat.index') }}" class="text-slate-300 transition hover:text-emerald-300">Riwayat</a>
                     <a href="{{ route('pengaturan.index') }}" class="text-slate-300 transition hover:text-emerald-300">Pengaturan</a>
                 </nav>
             </div>
