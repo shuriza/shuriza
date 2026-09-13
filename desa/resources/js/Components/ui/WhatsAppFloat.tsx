@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/cn';
 
 interface WhatsAppFloatProps {
@@ -11,10 +11,27 @@ export default function WhatsAppFloat({
     message = 'Halo, saya ingin bertanya tentang Desa Muneng.',
 }: WhatsAppFloatProps) {
     const [showTooltip, setShowTooltip] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
+    useEffect(() => {
+        const updateVisibility = () => setIsVisible(window.innerWidth >= 768 || window.scrollY > 520);
+        updateVisibility();
+        window.addEventListener('scroll', updateVisibility, { passive: true });
+        window.addEventListener('resize', updateVisibility);
+        return () => {
+            window.removeEventListener('scroll', updateVisibility);
+            window.removeEventListener('resize', updateVisibility);
+        };
+    }, []);
+
     return (
-        <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40">
+        <div
+            className={cn(
+                'fixed bottom-6 right-6 z-40 transition duration-200 md:bottom-8 md:right-8',
+                isVisible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0',
+            )}
+        >
             <div
                 className={cn(
                     'absolute bottom-full right-0 mb-2 transition-all duration-200',
@@ -44,4 +61,3 @@ export default function WhatsAppFloat({
         </div>
     );
 }
-

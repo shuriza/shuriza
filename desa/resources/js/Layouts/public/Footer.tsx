@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { MapPin, Info, Plus, Mountain } from 'lucide-react';
+import { MapPin, Info, Plus, Sprout } from 'lucide-react';
 import Container from '@/Components/ui/Container';
 import { navLinks } from './navLinks';
 
@@ -7,7 +7,7 @@ export default function Footer() {
     const year = new Date().getFullYear();
 
     return (
-        <footer className="bg-ink-1 text-white relative">
+        <footer className="relative bg-emerald-950 text-white">
             <div
                 className="absolute inset-x-0 top-0 h-2/3 pointer-events-none opacity-50"
                 style={{
@@ -21,8 +21,8 @@ export default function Footer() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                         <div>
                             <div className="flex items-center gap-2 mb-4">
-                                <span className="w-9 h-9 bg-brand rounded-xl flex items-center justify-center">
-                                    <Mountain className="w-5 h-5 text-white" aria-hidden />
+                                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand">
+                                    <Sprout className="h-5 w-5 text-white" aria-hidden />
                                 </span>
                                 <span className="text-lg font-extrabold tracking-tight">Desa Muneng</span>
                             </div>
@@ -30,7 +30,7 @@ export default function Footer() {
                                 Dibuat oleh warga, untuk warga. Tempat berbagi kenangan, informasi acara, dan keindahan
                                 Desa Muneng, Kecamatan Purwoasri, Kabupaten Kediri.
                             </p>
-                            <p className="text-zinc-500 text-xs mt-3">
+                            <p className="mt-3 text-xs text-zinc-400">
                                 24 km utara Kota Kediri &bull; 3 km dari Kertosono &bull; 100 km dari Surabaya
                             </p>
                         </div>
@@ -76,10 +76,10 @@ export default function Footer() {
                     </div>
 
                     <div className="mt-10 pt-6 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <p className="text-zinc-500 text-sm">
+                        <p className="text-sm text-zinc-400">
                             &copy; {year} Komunitas Warga Desa Muneng
                         </p>
-                        <p className="text-zinc-600 text-xs">Dibuat dengan cinta untuk kampung halaman</p>
+                        <p className="text-xs text-zinc-400">Dibuat dengan cinta untuk kampung halaman</p>
                     </div>
                 </div>
             </Container>

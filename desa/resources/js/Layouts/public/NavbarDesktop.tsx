@@ -44,70 +44,67 @@ export default function NavbarDesktop({ user, currentUrl, onSearch }: NavbarDesk
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="hidden md:flex items-center justify-between h-16 gap-3 lg:gap-6"
+            className="hidden md:block"
         >
-            <motion.div variants={itemVariants}>
-                <Logo />
-            </motion.div>
+            <div className="flex h-[74px] items-center gap-5">
+                <motion.div variants={itemVariants} className="shrink-0">
+                    <Logo />
+                </motion.div>
 
-            <nav className="flex items-center" aria-label="Navigasi utama">
+                <motion.button
+                    variants={itemVariants}
+                    onClick={onSearch}
+                    aria-label="Cari informasi desa (Ctrl+K)"
+                    title="Cari informasi desa (Ctrl+K)"
+                    className="group mx-auto flex h-11 max-w-xl flex-1 items-center gap-3 rounded-xl border border-line bg-surface-2 px-4 text-left text-sm text-ink-3 transition hover:border-line-strong hover:bg-surface-1 hover:shadow-sm"
+                >
+                    <Search className="h-4 w-4 shrink-0" aria-hidden />
+                    <span className="flex-1">Cari berita, acara, atau tempat...</span>
+                    <kbd className="hidden items-center rounded-md border border-line bg-surface-1 px-2 py-1 text-[10px] font-bold text-ink-3 lg:inline-flex">
+                        Ctrl K
+                    </kbd>
+                </motion.button>
+
+                <motion.div variants={itemVariants} className="flex shrink-0 items-center gap-2">
+                    {user ? (
+                        <UserMenu user={user} />
+                    ) : (
+                        <>
+                            <Link href="/login" className="px-3 py-2 text-sm font-bold text-ink-2 transition-colors hover:text-brand-strong">
+                                Masuk
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="rounded-xl bg-brand-strong px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-800 active:scale-[0.98]"
+                            >
+                                Daftar
+                            </Link>
+                        </>
+                    )}
+                </motion.div>
+            </div>
+
+            <nav
+                className="flex gap-1 overflow-x-auto border-t border-line-subtle py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                aria-label="Navigasi utama"
+            >
                 {navLinks.map((link) => {
                     const active = isActive(currentUrl, link.href);
                     return (
-                        <motion.div key={link.name} variants={itemVariants} className="relative">
+                        <motion.div key={link.name} variants={itemVariants} className="shrink-0">
                             <Link
                                 href={link.href}
                                 className={cn(
-                                    'relative inline-block px-2.5 py-1.5 lg:px-3 text-sm font-medium transition-colors duration-150',
-                                    active ? 'text-brand-strong' : 'text-ink-2 hover:text-ink-1',
+                                    'inline-flex min-h-9 items-center rounded-full px-4 text-sm font-bold transition-colors',
+                                    active ? 'bg-brand-soft text-brand-strong' : 'text-ink-2 hover:bg-surface-2 hover:text-ink-1',
                                 )}
                             >
                                 {link.name}
-                                {active && (
-                                    <motion.span
-                                        layoutId="navbar-active-indicator"
-                                        className="absolute left-2 right-2 -bottom-px h-0.5 rounded-full bg-brand"
-                                        transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-                                    />
-                                )}
                             </Link>
                         </motion.div>
                     );
                 })}
             </nav>
-
-            <motion.div variants={itemVariants} className="flex items-center gap-2 shrink-0">
-                <button
-                    onClick={onSearch}
-                    aria-label="Cari (Ctrl+K)"
-                    title="Cari (Ctrl+K)"
-                    className="group flex items-center gap-2 p-2 lg:pl-2.5 lg:pr-2 lg:py-1.5 rounded-xl text-ink-3 hover:text-ink-1 hover:bg-surface-2 transition-all duration-150"
-                >
-                    <Search className="w-4 h-4" aria-hidden />
-                    <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium bg-surface-3 border border-line rounded text-ink-3 group-hover:bg-surface-1 transition-colors">
-                        Ctrl K
-                    </kbd>
-                </button>
-
-                {user ? (
-                    <UserMenu user={user} />
-                ) : (
-                    <>
-                        <Link
-                            href="/login"
-                            className="px-3 py-1.5 text-sm font-medium text-ink-2 hover:text-brand-strong transition-colors"
-                        >
-                            Masuk
-                        </Link>
-                        <Link
-                            href="/register"
-                            className="px-3.5 py-1.5 bg-accent text-white text-sm font-semibold rounded-xl hover:bg-accent-strong transition-all duration-150 shadow-sm hover:shadow active:scale-[0.98]"
-                        >
-                            Daftar
-                        </Link>
-                    </>
-                )}
-            </motion.div>
         </motion.div>
     );
 }

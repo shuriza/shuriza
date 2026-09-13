@@ -28,7 +28,7 @@ export default function LikeButton({
         setAnimating(true);
 
         try {
-            const response = await axios.post('/api/likes', {
+            const response = await axios.post('/api/likes/toggle', {
                 likeable_type,
                 likeable_id,
             });

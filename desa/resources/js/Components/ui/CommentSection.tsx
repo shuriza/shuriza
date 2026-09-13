@@ -1,7 +1,7 @@
-import { router, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
+import axios from 'axios';
 import { FormEvent, useState } from 'react';
-import { MessageCircle, Send, LogIn, User, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/cn';
+import { MessageCircle, Send, LogIn, User, Loader2, Trash2 } from 'lucide-react';
 
 interface Comment {
     id: number;
@@ -21,7 +21,7 @@ interface CommentSectionProps {
 
 interface PageProps {
     auth: {
-        user: { id: number; name: string; email: string } | null;
+        user: { id: number; name: string; email: string; role?: string } | null;
     };
 }
 
@@ -46,41 +46,51 @@ function getInitials(name: string): string {
 }
 
 export default function CommentSection({
-    comments,
+    comments: initialComments,
     commentable_type,
     commentable_id,
 }: CommentSectionProps) {
-    const { auth } = usePage().props as PageProps;
+    const { auth } = usePage().props as unknown as PageProps;
+    const [comments, setComments] = useState<Comment[]>(initialComments);
     const [content, setContent] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!content.trim() || submitting) return;
 
         setSubmitting(true);
-        router.post(
-            '/comments',
-            {
+        setError(null);
+
+        try {
+            const response = await axios.post('/api/comments', {
                 commentable_type,
                 commentable_id,
                 content: content.trim(),
-            },
-            {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setContent('');
-                },
-                onFinish: () => {
-                    setSubmitting(false);
-                },
-            }
-        );
+            });
+            setComments((prev) => [response.data.comment, ...prev]);
+            setContent('');
+        } catch {
+            setError('Komentar gagal dikirim. Coba lagi sebentar.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('Hapus komentar ini?')) return;
+
+        try {
+            await axios.delete(`/api/comments/${id}`);
+            setComments((prev) => prev.filter((comment) => comment.id !== id));
+        } catch {
+            setError('Komentar gagal dihapus.');
+        }
     };
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-brand-strong" aria-hidden />
                 <h3 className="text-lg font-semibold text-ink-1">
@@ -88,7 +98,12 @@ export default function CommentSection({
                 </h3>
             </div>
 
-            {/* Comment Form */}
+            {error && (
+                <p role="alert" className="text-sm text-red-600">
+                    {error}
+                </p>
+            )}
+
             {auth.user ? (
                 <form onSubmit={handleSubmit} className="space-y-3">
                     <div className="flex items-start gap-3">
@@ -98,18 +113,23 @@ export default function CommentSection({
                             </span>
                         </div>
                         <div className="flex-1">
+                            <label htmlFor="comment-content" className="sr-only">
+                                Tulis komentar
+                            </label>
                             <textarea
+                                id="comment-content"
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 placeholder="Tulis komentar Anda..."
                                 rows={3}
-                                className="w-full px-4 py-3 border border-line rounded-xl text-sm text-ink-1 placeholder-ink-4 focus:outline-none focus:ring-2 focus:ring-brand-soft focus:border-brand resize-none transition-shadow duration-200 bg-surface-1"
+                                maxLength={1000}
+                                className="w-full px-4 py-3 border border-line rounded-xl text-sm text-ink-1 placeholder-ink-4 focus:outline-none focus:ring-2 focus:ring-brand-ring focus:border-brand resize-none transition-shadow duration-200 bg-surface-1"
                             />
                             <div className="flex justify-end mt-2">
                                 <button
                                     type="submit"
                                     disabled={!content.trim() || submitting}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-xl hover:bg-brand-strong disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 active:scale-[0.98]"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-xl hover:bg-brand-strong disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand-ring focus-visible:ring-offset-2"
                                 >
                                     {submitting ? (
                                         <>
@@ -130,10 +150,10 @@ export default function CommentSection({
             ) : (
                 <div className="bg-surface-2 border border-line rounded-xl p-6 text-center">
                     <User className="w-10 h-10 mx-auto text-ink-4 mb-3" aria-hidden strokeWidth={1.5} />
-                    <p className="text-sm text-ink-2 mb-3">Login untuk berkomentar</p>
+                    <p className="text-sm text-ink-2 mb-3">Masuk untuk berkomentar</p>
                     <a
                         href="/login"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-xl hover:bg-brand-strong transition-colors duration-200 active:scale-[0.98]"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-xl hover:bg-brand-strong transition-colors duration-200 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand-ring focus-visible:ring-offset-2"
                     >
                         <LogIn className="w-4 h-4" aria-hidden />
                         Masuk
@@ -141,7 +161,6 @@ export default function CommentSection({
                 </div>
             )}
 
-            {/* Comments List */}
             {comments.length > 0 ? (
                 <div className="space-y-4">
                     {comments.map((comment) => (
@@ -167,6 +186,17 @@ export default function CommentSection({
                                     {comment.content}
                                 </p>
                             </div>
+                            {auth.user !== null &&
+                                (auth.user.id === comment.user.id || auth.user.role === 'admin') && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleDelete(comment.id)}
+                                    aria-label={`Hapus komentar dari ${comment.user.name}`}
+                                    className="p-2 -m-1 text-ink-4 hover:text-red-600 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-brand-ring focus-visible:ring-offset-2"
+                                >
+                                    <Trash2 className="w-4 h-4" aria-hidden />
+                                </button>
+                            )}
                         </div>
                     ))}
                 </div>

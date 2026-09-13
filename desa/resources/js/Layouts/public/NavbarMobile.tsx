@@ -30,25 +30,46 @@ function isActive(url: string, href: string) {
 export default function NavbarMobile({ user, currentUrl, isOpen, onOpen, onClose, onSearch }: NavbarMobileProps) {
     return (
         <>
-            <div className="md:hidden flex items-center justify-between h-16">
+            <div className="flex h-16 items-center justify-between md:hidden">
                 <Logo />
                 <div className="flex items-center gap-1">
                     <button
                         onClick={onSearch}
                         aria-label="Cari"
-                        className="p-2 rounded-lg text-ink-2 hover:text-brand-strong hover:bg-surface-2 transition-colors"
+                        className="flex h-11 w-11 items-center justify-center rounded-xl text-ink-2 transition-colors hover:bg-surface-2 hover:text-brand-strong"
                     >
                         <Search className="w-5 h-5" aria-hidden />
                     </button>
                     <button
                         onClick={onOpen}
                         aria-label="Buka menu"
-                        className="p-2 rounded-lg text-ink-2 hover:text-brand-strong hover:bg-surface-2 transition-colors"
+                        className="flex h-11 w-11 items-center justify-center rounded-xl text-ink-2 transition-colors hover:bg-surface-2 hover:text-brand-strong"
                     >
                         <MenuIcon className="w-6 h-6" aria-hidden />
                     </button>
                 </div>
             </div>
+
+            <nav
+                className="-mx-4 flex gap-1 overflow-x-auto border-t border-line-subtle px-4 py-2 md:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                aria-label="Akses halaman utama"
+            >
+                {navLinks.map((link) => {
+                    const active = isActive(currentUrl, link.href);
+                    return (
+                        <Link
+                            key={link.name}
+                            href={link.href}
+                            className={cn(
+                                'inline-flex min-h-9 shrink-0 items-center rounded-full px-3.5 text-xs font-bold transition-colors',
+                                active ? 'bg-brand-soft text-brand-strong' : 'bg-surface-2 text-ink-2',
+                            )}
+                        >
+                            {link.name}
+                        </Link>
+                    );
+                })}
+            </nav>
 
             <Transition show={isOpen} as={Fragment}>
                 <Dialog onClose={onClose} className="relative z-[45] md:hidden">

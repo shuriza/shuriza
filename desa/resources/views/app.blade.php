@@ -3,10 +3,10 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="Website resmi Desa Muneng, Kecamatan Purwoasri, Kabupaten Kediri, Jawa Timur. Informasi desa, event, kenangan, dan destinasi.">
+        <meta name="description" content="Website komunitas Desa Muneng, Kecamatan Purwoasri, Kabupaten Kediri, Jawa Timur. Informasi desa, acara, kenangan, dan destinasi.">
         <meta name="keywords" content="Desa Muneng, Purwoasri, Kediri, Jawa Timur, desa, website desa">
         <meta property="og:title" content="{{ config('app.name', 'Desa Muneng') }}">
-        <meta property="og:description" content="Website resmi Desa Muneng, Kecamatan Purwoasri, Kabupaten Kediri">
+        <meta property="og:description" content="Ruang informasi dan cerita warga Desa Muneng, Kecamatan Purwoasri, Kabupaten Kediri">
         <meta property="og:type" content="website">
         <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
 
