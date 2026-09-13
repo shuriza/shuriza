@@ -10,3 +10,6 @@ Name web routes and generate internal URLs from route names. Use route(...) in B
 
 ## Keep single-language Indonesian copy inline
 Write user-facing copy inline in Indonesian for the current single-language interface. Do not add translation keys or lang files unless the work explicitly introduces localization support.
+
+## Use Form Requests for office configuration
+Validate service and counter configuration with dedicated Form Requests. Normalize codes, names, booleans, and nullable operator names before passing only validated data to the configuration service.

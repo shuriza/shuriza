@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CounterController;
+use App\Http\Controllers\DailyReportController;
+use App\Http\Controllers\OfficeConfigurationController;
 use App\Http\Controllers\OperationsController;
 use App\Http\Controllers\TicketPrintController;
 use Illuminate\Support\Facades\Route;
@@ -27,3 +29,12 @@ Route::post('/tiket/{ticket}/cetak', [TicketPrintController::class, 'print'])->n
 Route::get('/operasional', [OperationsController::class, 'index'])->name('operasional.index');
 Route::post('/operasional/sinkronkan', [OperationsController::class, 'sync'])->name('operasional.sinkronkan');
 Route::post('/operasional/backup', [OperationsController::class, 'backup'])->name('operasional.backup');
+
+// Pengaturan lokal layanan dan loket.
+Route::get('/pengaturan', [OfficeConfigurationController::class, 'index'])->name('pengaturan.index');
+Route::post('/pengaturan/layanan', [OfficeConfigurationController::class, 'storeService'])->name('pengaturan.layanan.simpan');
+Route::post('/pengaturan/layanan/{service}', [OfficeConfigurationController::class, 'updateService'])->name('pengaturan.layanan.perbarui');
+Route::post('/pengaturan/loket', [OfficeConfigurationController::class, 'storeCounter'])->name('pengaturan.loket.simpan');
+Route::post('/pengaturan/loket/{counter}', [OfficeConfigurationController::class, 'updateCounter'])->name('pengaturan.loket.perbarui');
+
+Route::get('/laporan/harian', [DailyReportController::class, 'index'])->name('laporan.harian');

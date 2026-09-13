@@ -12,6 +12,8 @@ Aplikasi desktop lokal untuk petugas loket pelayanan publik. Dibangun dengan Lar
 | Printer NativePHP | Terimplementasi | Validasi akhir memerlukan printer fisik 58 mm dan driver sasaran |
 | Sinkronisasi | Klien dan resolusi konflik tersedia | Server pusat dan alokasi nomor lintas perangkat belum tersedia |
 | Backup dan kesehatan outbox | Tersedia | Restore tetap manual dan dilakukan ketika aplikasi ditutup |
+| Pengaturan layanan dan loket | Tersedia | Tidak menghapus histori; perubahan berisiko ditolak ketika antrean masih aktif |
+| Laporan harian lokal | Tersedia | Berdasarkan database perangkat ini, bukan agregat lintas perangkat |
 | Installer internal Windows x64 | Pernah berhasil dibangun | Source aplikasi masih terekspos pada build tanpa secure bundle |
 | Distribusi publik | Diblokir release gate | Memerlukan secure bundle Bifrost dan code signing Windows |
 
@@ -36,6 +38,8 @@ Petugas loket pelayanan publik, dengan contoh layanan perizinan, legalisasi, dan
 - Snapshot SQLite konsisten melalui Online Backup API dan health gate untuk backlog outbox.
 - Halaman Operasional untuk melihat kesehatan outbox, kegagalan pending, menjalankan sinkronisasi manual, dan membuat backup lokal.
 - Validasi backup, restore offline dengan backup pra-restore, dan retensi aman untuk outbox yang sudah tersinkron.
+- Pengaturan lokal untuk menambah/mengubah layanan, estimasi, loket, petugas, serta status aktif/buka tanpa menghapus histori.
+- Laporan harian per layanan: tiket terbit, status, rata-rata waktu tunggu, dan rata-rata waktu pelayanan.
 - Release gate yang menolak distribusi publik tanpa secure bundle, production config, identitas/versi aplikasi, dan code signing.
 
 ## Kenapa native, bukan web biasa?
@@ -152,7 +156,7 @@ npm ci --ignore-scripts
 npm run build
 ```
 
-Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **52 tes dan 195 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
+Suite menggunakan SQLite terisolasi melalui `phpunit.xml`; bukan database operasional. Baseline saat dokumentasi ini diperbarui adalah **63 tes dan 245 assertions**. Workflow monorepo `../.github/workflows/antrian-loket.yml` menjalankan pemeriksaan format, migrasi pada database baru, tes, dan build frontend untuk perubahan proyek ini. Keberhasilan perintah lokal tidak sama dengan status GitHub Actions.
 
 Konvensi tim tersedia di `.ai/rules/index.md`. Alur review, invariant yang wajib dijaga, konflik gaya yang ditunda, dan acceptance rilis berikutnya dijelaskan dalam [panduan kualitas dan roadmap](docs/quality-roadmap.md).
 
@@ -192,6 +196,19 @@ php artisan antrian:outbox-prune --days=30 --execute
 ```
 
 Hanya entry dengan `synced_at` yang melewati retensi yang dapat dihapus. Pending outbox tidak pernah masuk prune. Exit code `antrian:outbox-health` gagal berarti jumlah pending, umur event tertua, atau percobaan maksimum telah mencapai ambang `ANTRIAN_OUTBOX_*_WARNING`; pulihkan endpoint dan periksa `last_error`, jangan hapus pending untuk menghilangkan alarm.
+
+## Pengaturan kantor dan laporan
+
+Menu **Pengaturan** mengelola data lokal tanpa menghapus histori. Guard yang berlaku:
+
+- kode layanan hanya boleh berisi huruf kapital/angka maksimal empat karakter;
+- kode layanan tidak dapat diganti setelah tiket pernah diterbitkan karena dipakai sebagai identitas sinkronisasi;
+- layanan tidak dapat dinonaktifkan selama memiliki loket buka atau tiket menunggu/dipanggil;
+- loket hanya dapat dibuka pada layanan aktif;
+- loket yang sedang memegang tiket tidak dapat ditutup atau dipindahkan ke layanan lain;
+- layanan nonaktif tidak dapat menerbitkan tiket baru.
+
+Menu **Laporan** menampilkan ringkasan satu tanggal untuk database perangkat saat ini. Rata-rata tunggu dihitung dari `issued_at` sampai `called_at`; rata-rata pelayanan dari `called_at` sampai `finished_at`. Angka ini belum menggabungkan instalasi lain karena server pusat belum tersedia.
 
 ## Batas penggunaan multi-perangkat dan rilis
 

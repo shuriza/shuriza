@@ -38,6 +38,8 @@ Pilih file test yang sesuai perubahan; contoh di atas untuk sinkronisasi. Test m
 - **Backup:** database aktif tidak disalin sebagai file mentah. Gunakan `antrian:backup`, yang membuat snapshot konsisten melalui SQLite Online Backup API dan memvalidasi integritas serta skema minimum sebelum publish.
 - **Restore:** jalankan offline dengan `--confirm=RESTORE`. Sumber divalidasi lebih dulu, database aktif dibackup, hasil restore divalidasi lagi, dan kegagalan memulihkan backup pra-restore.
 - **Outbox:** backlog pending tidak dihapus untuk mengurangi ukuran. `antrian:outbox-health` memantau jumlah pending, umur tertua, dan jumlah percobaan; `antrian:outbox-prune` hanya menghapus entry tersinkron setelah retensi dan default-nya preview.
+- **Konfigurasi kantor:** jangan menghapus layanan/loket yang memiliki histori. Kode layanan adalah identitas sinkronisasi setelah tiket terbit; layanan/loket dengan pekerjaan aktif tidak boleh dinonaktifkan atau dipindahkan.
+- **Laporan:** metrik harian adalah data lokal per perangkat. Jangan menyebutnya laporan kantor gabungan sebelum server pusat dan kontrak agregasi tersedia.
 
 ## Quality gate otomatis
 
@@ -75,6 +77,8 @@ Urutan berikut adalah rencana, bukan fitur yang sudah selesai atau otomatis diim
 |P0|Secure desktop bundle dan distribusi|Gate `composer native:release` sudah fail-closed. NativePHP Desktop 2.3 memerlukan bundle Bifrost berbayar, bertentangan dengan kebijakan dependensi gratis saat ini; tim harus menyetujui layanan tersebut dan menyediakan Azure Trusted Signing atau sertifikat Windows sebelum installer secure dapat dibangun. Setelah tersedia, uji install/upgrade dengan database pengguna tetap utuh dan pastikan tidak ada peringatan insecure build.|
 |P1|Uji printer fisik 58 mm|Uji printer default, nama printer eksplisit, offline/hilang, lebar struk, dan hasil kertas; memerlukan perangkat/driver sasaran.|
 |P1|Backup/restore dan kapasitas outbox|Selesai untuk aplikasi lokal: snapshot WAL-safe, validasi backup, restore dengan backup pra-restore, health gate, retention preview/execute, dan halaman Operasional tersedia. Acceptance produksi tetap membutuhkan drill restore pada salinan database paket dengan aplikasi ditutup.|
+|P1|Konfigurasi kantor lokal|Selesai: layanan dan loket dapat ditambah/diperbarui dengan guard terhadap perubahan identitas sinkronisasi dan pekerjaan aktif. Penghapusan historis sengaja tidak disediakan.|
+|P1|Laporan operasional harian|Selesai untuk database lokal: status per layanan dan durasi rata-rata tersedia dengan filter tanggal. Agregasi lintas perangkat menunggu server pusat.|
 |P1|Bukti penerimaan operator|Rekam demo installer lokal: ambil, panggil, lewati, selesai, cetak, restart, serta operasi tanpa jaringan; operator memverifikasi pesan kegagalan dan pemulihan.|
 |P2|Penyelesaian perbedaan gaya test|Gunakan hasil review kategori test di atas; perubahan hanya setelah ada manfaat isolasi, determinisme, atau pemeliharaan yang terukur.|
 

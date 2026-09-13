@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\OfficeConfigurationException;
 use App\Exceptions\QueueConflictException;
 use App\Models\Counter;
 use App\Models\OutboxEntry;
@@ -137,7 +138,7 @@ class CounterController extends Controller
     {
         try {
             $ticket = $this->queue->issue($service);
-        } catch (QueueConflictException $e) {
+        } catch (OfficeConfigurationException|QueueConflictException $e) {
             return back()->with('error', $e->getMessage());
         }
 

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\TicketEventType;
 use App\Enums\TicketStatus;
+use App\Exceptions\OfficeConfigurationException;
 use App\Exceptions\QueueConflictException;
 use App\Models\Counter;
 use App\Models\Service;
@@ -32,6 +33,12 @@ class QueueService
         for ($attempt = 1; $attempt <= self::CONCURRENCY_ATTEMPTS; $attempt++) {
             try {
                 return DB::transaction(function () use ($service, $serviceDate): Ticket {
+                    $service = Service::query()->findOrFail($service->getKey());
+
+                    if (! $service->is_active) {
+                        throw OfficeConfigurationException::inactiveService($service->name);
+                    }
+
                     // SQLite mengabaikan lockForUpdate(), jadi UNIQUE index adalah
                     // arbiter nyata ketika dua loket menghitung nomor yang sama.
                     $nextNumber = (int) Ticket::query()
